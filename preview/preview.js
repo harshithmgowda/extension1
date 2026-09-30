@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Export Buttons
   const exportPdfBtn = document.getElementById('exportPdfBtn');
+  const printDocBtn = document.getElementById('printDocBtn');
   const exportDocxBtn = document.getElementById('exportDocxBtn');
   const exportMdBtn = document.getElementById('exportMdBtn');
   const exportHtmlBtn = document.getElementById('exportHtmlBtn');
@@ -622,12 +623,22 @@ function binarySearch(nums, target) {
   // EXPORT HANDLERS (Markdown, HTML, DOCX, PDF)
   // =========================================================================
 
-  // 1. Export PDF (Direct Print & Save as PDF - 100% exact pages, zero blank pages)
-  exportPdfBtn.addEventListener('click', async () => {
-    showToast('Opening PDF print preview...');
-    const templateCss = await fetchActiveTemplateCss();
-    PdfExporter.export(currentDoc, documentContent.innerHTML, templateCss, currentSettings);
+  // 1. Download exact PDF (.pdf file directly downloaded to computer)
+  exportPdfBtn.addEventListener('click', () => {
+    const safeTitle = (currentDoc.title || 'notes').replace(/[^a-z0-9_-]/gi, '_');
+    const filename = `${safeTitle}.pdf`;
+    showToast(`Generating ${filename}...`);
+    PdfExporter.download(currentDoc, currentSettings.exportMode || 'study', filename, currentSettings);
+    showToast(`Downloaded ${filename}`);
   });
+
+  // 2. System Print (Direct browser Print to PDF or printer)
+  if (printDocBtn) {
+    printDocBtn.addEventListener('click', () => {
+      showToast('Opening print dialog...');
+      PdfExporter.print(currentDoc, currentSettings);
+    });
+  }
 
   // 2. Export DOCX
   exportDocxBtn.addEventListener('click', () => {

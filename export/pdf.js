@@ -1,658 +1,831 @@
 /**
- * ChatNotes - PDF Exporter
- * Generates vector-crisp, multi-page PDFs using clean browser print rendering.
- * Guarantees exact pages with ZERO blank/empty pages, full Xcode syntax highlighting,
- * tables, headers, footers, custom page sizes, and responsive paper margins.
+ * ChatNotes - PDF Exporter & Generator
+ * Generates valid, vector-crisp, multi-page PDF (.pdf) documents client-side.
+ * 100% offline, zero external servers, zero CSP issues.
+ * Preserves Xcode code blocks with Apple dots & line numbers, tables, callouts, headers, and footers.
+ * Supports direct .pdf file download and native in-page printing.
  */
 
 const PdfExporter = {
   /**
-   * Export document to PDF via clean dedicated print window or fallback iframe
+   * Generates and downloads native .pdf file from document model
    * @param {object} doc Structured document model
-   * @param {string} renderedHtml Inner HTML of document body
-   * @param {string} templateCss Embedded CSS styles
-   * @param {object} settings Customization preferences
+   * @param {'exact'|'study'|'compact'} mode
+   * @param {string} filename
+   * @param {object} settings Customization settings
+   */
+  download(doc, mode = 'study', filename = 'notes.pdf', settings = {}) {
+    const pdfBytes = this.generatePdf(doc, mode, settings);
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 150);
+  },
+
+  /**
+   * Compatibility wrapper for existing export button
    */
   export(doc, renderedHtml, templateCss = '', settings = {}) {
-    const title = (doc && doc.title) ? doc.title : 'ChatNotes Document';
-    const htmlContent = this.generatePrintableHtml(doc, renderedHtml, templateCss, settings);
-
-    // 1. Primary method: Dedicated clean print tab/window
-    // This avoids all parent DOM overflow/flex clipping bugs in Chromium that cause empty pages
-    let printWin = null;
-    try {
-      printWin = window.open('', '_blank');
-    } catch (e) {
-      console.warn('[ChatNotes] window.open failed, falling back to iframe:', e);
-    }
-
-    if (printWin && !printWin.closed) {
-      try {
-        printWin.document.open();
-        printWin.document.write(htmlContent);
-        printWin.document.close();
-        return;
-      } catch (err) {
-        console.warn('[ChatNotes] Failed to write to print window, falling back to iframe:', err);
-      }
-    }
-
-    // 2. Fallback method: Isolated hidden iframe print
-    this.printViaIframe(htmlContent);
+    const title = (doc && doc.title) ? doc.title : 'notes';
+    const safeTitle = title.replace(/[^a-z0-9_-]/gi, '_');
+    this.download(doc, settings.exportMode || 'study', `${safeTitle}.pdf`, settings);
   },
 
   /**
-   * Builds self-contained, standalone printable HTML document
-   * Optimized specifically for Chromium and WebKit print pagination engines
+   * Direct in-page browser print to PDF / printer
    */
-  generatePrintableHtml(doc, renderedHtml, templateCss = '', settings = {}) {
-    const title = (doc && doc.title) ? doc.title : 'ChatNotes Document';
-    const font = settings.font || 'Inter';
-    const accent = settings.accentColor || '#0071e3';
-    const pageSize = settings.pageSize || 'A4';
-    const orientation = settings.orientation || 'portrait';
+  print(doc, settings = {}) {
+    const canvasScroll = document.querySelector('.canvas-scroll');
+    const savedScroll = canvasScroll ? canvasScroll.scrollTop : 0;
+    if (canvasScroll) canvasScroll.scrollTop = 0;
 
-    const marginMap = {
-      small: '10mm',
-      normal: '18mm',
-      large: '26mm'
+    const cleanup = () => {
+      if (canvasScroll) canvasScroll.scrollTop = savedScroll;
+      window.removeEventListener('afterprint', cleanup);
     };
-    const marginValue = marginMap[settings.margins] || '18mm';
+    window.addEventListener('afterprint', cleanup, { once: true });
+    setTimeout(cleanup, 4000);
 
-    const isSerif = font === 'Georgia' || font === 'Merriweather' || font === 'Playfair Display' || font === 'Times New Roman';
-    const isMono = font === 'JetBrains Mono' || font === 'Fira Code';
-    const fallbackFont = isSerif ? 'Georgia, serif' : isMono ? 'monospace' : '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-
-    const dateStr = doc && doc.createdAt 
-      ? new Date(doc.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-      : new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${this.escapeHtml(title)}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <style>
-    /* CSS Reset & Variables */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    :root {
-      --doc-font: '${font}', ${fallbackFont};
-      --doc-accent: ${accent};
-      --doc-accent-light: ${accent}15;
-    }
-
-    @page {
-      size: ${pageSize} ${orientation};
-      margin: ${marginValue};
-    }
-
-    body {
-      background-color: #f1f5f9;
-      color: #0f172a;
-      font-family: var(--doc-font);
-      line-height: 1.6;
-      font-size: ${settings.fontSize || 14}px;
-      margin: 0;
-      padding: 32px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-
-    /* Screen-only Print Bar */
-    .chatnotes-print-bar {
-      position: sticky;
-      top: 12px;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      width: 100%;
-      max-width: 860px;
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 12px;
-      padding: 10px 18px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    .print-bar-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: #475569;
-    }
-
-    .print-bar-badge {
-      background: #f1f5f9;
-      color: #1e293b;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .print-bar-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-print-action {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s ease;
-      font-family: inherit;
-    }
-
-    .btn-print-primary {
-      background: #0071e3;
-      color: #ffffff;
-    }
-    .btn-print-primary:hover {
-      background: #0077ed;
-    }
-
-    .btn-print-secondary {
-      background: #f1f5f9;
-      color: #475569;
-    }
-    .btn-print-secondary:hover {
-      background: #e2e8f0;
-      color: #1e293b;
-    }
-
-    /* Document Sheet Wrapper */
-    .print-sheet {
-      width: 100%;
-      max-width: 860px;
-      background: #ffffff;
-      padding: 48px 56px;
-      border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
-    }
-
-    .chatnotes-document {
-      width: 100%;
-      font-family: var(--doc-font);
-      background: #ffffff;
-    }
-
-    .chatnotes-document p,
-    .chatnotes-document li,
-    .chatnotes-document td,
-    .chatnotes-document th,
-    .chatnotes-document blockquote,
-    .chatnotes-document .q-text {
-      font-family: var(--doc-font);
-    }
-
-    /* Document Title & Meta Header */
-    .doc-header {
-      padding-bottom: 20px;
-      margin-bottom: 28px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .doc-title {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.25;
-      margin-bottom: 8px;
-      color: #1d1d1f;
-    }
-
-    .doc-meta {
-      font-size: 12px;
-      color: #86868b;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .meta-dot {
-      color: #d1d1d6;
-      font-size: 10px;
-    }
-
-    /* Print Header & Footer Emulation */
-    .print-doc-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 9pt;
-      color: #94a3b8;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 6px;
-      margin-bottom: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    .print-doc-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 9pt;
-      color: #94a3b8;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 8px;
-      margin-top: 32px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    /* Question / Prompt Callout */
-    .question-box {
-      background: #fbfbfd;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-left: 4px solid var(--doc-accent, #0071e3);
-      border-radius: 0 8px 8px 0;
-      padding: 14px 18px;
-      margin-bottom: 24px;
-    }
-
-    .q-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--doc-accent, #0071e3);
-      margin-bottom: 4px;
-    }
-
-    .q-text {
-      font-size: 14.5px;
-      font-weight: 500;
-      color: #1d1d1f;
-      line-height: 1.5;
-    }
-
-    /* Key Points Box */
-    .key-points-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin: 20px 0;
-    }
-
-    .key-points-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--doc-accent, #0071e3);
-      margin-bottom: 8px;
-    }
-
-    /* Turn Sections */
-    .turn-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-bottom: 12px;
-    }
-
-    .turn-badge.user {
-      background: #eff6ff;
-      color: var(--doc-accent, #0071e3);
-    }
-
-    .turn-badge.assistant {
-      background: #f1f5f9;
-      color: #475569;
-    }
-
-    .user-turn, .assistant-turn {
-      margin-bottom: 28px;
-    }
-
-    .compact-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .compact-badge {
-      font-size: 11px;
-      font-weight: 700;
-      color: #64748b;
-      min-width: 65px;
-    }
-
-    /* Xcode Playground Style Code Window */
-    .xcode-window {
-      background: #fbfbfd;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 8px;
-      overflow: hidden;
-      margin: 20px 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    }
-
-    .xcode-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 7px 12px;
-      background: #f4f4f6;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    .xcode-controls {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      width: 50px;
-    }
-
-    .xcode-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .xcode-dot.close { background: #ff5f56; }
-    .xcode-dot.minimize { background: #ffbd2e; }
-    .xcode-dot.zoom { background: #27c93f; }
-
-    .xcode-lang-badge {
-      font-size: 10.5px;
-      font-weight: 600;
-      color: #475569;
-      background: rgba(0, 0, 0, 0.06);
-      padding: 2px 7px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .xcode-actions {
-      display: flex;
-      width: 50px;
-      justify-content: flex-end;
-    }
-
-    .xcode-content {
-      display: flex;
-      background: #ffffff;
-      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-      font-size: 12.5px;
-      line-height: 1.55;
-    }
-
-    .xcode-gutter {
-      padding: 12px 10px;
-      background: #fafafc;
-      border-right: 1px solid rgba(0, 0, 0, 0.06);
-      color: #94a3b8;
-      text-align: right;
-      user-select: none;
-      font-size: 11px;
-    }
-
-    .xcode-code {
-      padding: 12px 16px;
-      overflow-x: auto;
-      flex: 1;
-      color: #1e293b;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .xcode-kw { color: #ad3da4; font-weight: 600; }
-    .xcode-str { color: #d12f1b; }
-    .xcode-num { color: #272ad8; }
-    .xcode-comment { color: #707f8f; font-style: italic; }
-    .xcode-func { color: #3e8087; }
-    .xcode-type { color: #4b2185; }
-
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 13px;
-    }
-
-    th, td {
-      padding: 10px 14px;
-      text-align: left;
-      border: 1px solid #e2e8f0;
-    }
-
-    th {
-      background: #f8fafc;
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    /* Embedded Template Styles */
-    ${templateCss}
-
-    /* ==========================================================================
-       Print Engine Overrides (Guarantees zero blank pages & exact pagination)
-       ========================================================================== */
-    @media print {
-      html, body {
-        background: #ffffff !important;
-        color: #000000 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: block !important;
-        min-height: 0 !important;
-        height: auto !important;
-        width: 100% !important;
-      }
-
-      .chatnotes-print-bar {
-        display: none !important;
-      }
-
-      .xcode-actions,
-      .xcode-copy-btn {
-        display: none !important;
-      }
-
-      .print-sheet {
-        box-shadow: none !important;
-        border: none !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        background: transparent !important;
-      }
-
-      .chatnotes-document {
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-      }
-
-      /* Clean page-break control without clipping */
-      .question-box,
-      .key-points-box,
-      .xcode-window,
-      table,
-      blockquote,
-      .study-card,
-      .user-turn,
-      .assistant-turn,
-      .compact-row {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-
-      h1, h2, h3 {
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-      }
-
-      .xcode-window {
-        box-shadow: none !important;
-        border: 1px solid #cbd5e1 !important;
-        background: #f8fafc !important;
-      }
-
-      .xcode-content {
-        background: #ffffff !important;
-      }
-
-      .xcode-code, .xcode-line {
-        white-space: pre-wrap !important;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Print Control Bar (Screen only) -->
-  <div class="chatnotes-print-bar">
-    <div class="print-bar-info">
-      <strong>ChatNotes PDF Preview</strong>
-      <span class="print-bar-badge">${pageSize} ${orientation}</span>
-      <span>•</span>
-      <span>${this.escapeHtml(settings.template || 'Academic')}</span>
-    </div>
-    <div class="print-bar-actions">
-      <button id="btnPrintNow" class="btn-print-action btn-print-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
-          <polyline points="6 9 6 2 18 2 18 9"></polyline>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-          <rect x="6" y="14" width="12" height="8"></rect>
-        </svg>
-        <span>Print / Save PDF</span>
-      </button>
-      <button id="btnClosePrint" class="btn-print-action btn-print-secondary">
-        <span>Close</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Document Sheet -->
-  <main class="print-sheet">
-    ${settings.headerStyle === 'title' ? `
-      <div class="print-doc-header">
-        <span>${this.escapeHtml(title)}</span>
-        <span>${dateStr}</span>
-      </div>` : ''}
-
-    <article class="chatnotes-document template-${settings.template || 'academic'}">
-      ${renderedHtml}
-    </article>
-
-    ${settings.footerStyle !== 'none' ? `
-      <div class="print-doc-footer">
-        <span>Generated by ChatNotes • 100% Client-Side Private Document</span>
-        <span>${settings.footerStyle === 'page-numbers' ? 'Page 1' : this.escapeHtml(title)}</span>
-      </div>` : ''}
-  </main>
-
-  <script>
-    // 1. Controls
-    document.getElementById('btnPrintNow').addEventListener('click', function() {
+    try {
       window.print();
-    });
-    document.getElementById('btnClosePrint').addEventListener('click', function() {
-      window.close();
-    });
-
-    // 2. Auto-trigger print dialog once document resources are ready
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        window.focus();
-        window.print();
-      }, 300);
-    });
-  </script>
-</body>
-</html>`;
+    } catch (err) {
+      console.warn('[ChatNotes] window.print error, triggering direct PDF download instead:', err);
+      this.export(doc, '', '', settings);
+    }
   },
 
   /**
-   * Hidden iframe fallback printing
+   * Synthesizes binary PDF 1.4 document
+   * @param {object} doc Canonical document model
+   * @param {'exact'|'study'|'compact'} mode
+   * @param {object} settings
+   * @returns {Uint8Array} Binary PDF data
    */
-  printViaIframe(htmlContent) {
-    let iframe = document.getElementById('chatnotes-print-frame');
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.id = 'chatnotes-print-frame';
-      iframe.style.position = 'fixed';
-      iframe.style.left = '-9999px';
-      iframe.style.top = '0';
-      iframe.style.width = '1024px';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      iframe.style.visibility = 'hidden';
-      document.body.appendChild(iframe);
+  generatePdf(doc, mode = 'study', settings = {}) {
+    const title = (doc && doc.title) ? doc.title : 'Conversation Notes';
+    const pageSize = (settings.pageSize || 'a4').toLowerCase();
+    const orientation = settings.orientation || 'portrait';
+    const accentHex = settings.accentColor || '#0071e3';
+    const accentRgb = this.hexToRgb(accentHex, [0, 0.443, 0.89]);
+
+    // Page dimensions in PDF points (1/72 inch)
+    const PAGE_SIZES = {
+      a4: [595.28, 841.89],
+      letter: [612.0, 792.0],
+      a5: [419.53, 595.28]
+    };
+
+    let [pageWidth, pageHeight] = PAGE_SIZES[pageSize] || PAGE_SIZES.a4;
+    if (orientation === 'landscape') {
+      const temp = pageWidth;
+      pageWidth = pageHeight;
+      pageHeight = temp;
     }
 
-    const frameDoc = iframe.contentWindow.document;
-    frameDoc.open();
-    frameDoc.write(htmlContent);
-    frameDoc.close();
+    const marginMap = { small: 32, normal: 44, large: 58 };
+    const margin = marginMap[settings.margins] || 44;
+    const contentWidth = pageWidth - (margin * 2);
 
-    setTimeout(() => {
-      try {
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-      } catch (err) {
-        console.warn('[ChatNotes] iframe print error:', err);
+    // Format content using DocumentFormatter if available
+    const formatted = (typeof DocumentFormatter !== 'undefined')
+      ? DocumentFormatter.format(doc, mode)
+      : { title, sections: [] };
+
+    // Layout builder
+    const builder = new PdfBuilder(pageWidth, pageHeight, margin, contentWidth, accentRgb, title, settings);
+
+    // 1. Title & Metadata Header
+    builder.drawDocumentHeader(formatted.title, doc, mode);
+
+    // 2. Render each section
+    if (Array.isArray(formatted.sections)) {
+      for (const sec of formatted.sections) {
+        if (sec.type === 'study-card') {
+          builder.drawPromptBox(sec.question);
+          if (Array.isArray(sec.blocks)) {
+            for (const block of sec.blocks) {
+              builder.drawBlock(block);
+            }
+          }
+        } else if (sec.type === 'user-turn' || sec.type === 'assistant-turn') {
+          builder.drawTurnHeader(sec.badge, sec.type === 'user-turn');
+          if (Array.isArray(sec.blocks)) {
+            for (const block of sec.blocks) {
+              builder.drawBlock(block);
+            }
+          }
+        } else {
+          // Compact mode
+          builder.drawCompactRow(sec.badge, sec.blocks);
+        }
       }
-    }, 400);
+    }
+
+    // 3. Finalize pages and compile binary
+    return builder.compilePdf();
   },
 
-  /**
-   * Dedicated tab export
-   */
-  openPrintTab(doc, renderedHtml, templateCss = '', settings = {}) {
-    this.export(doc, renderedHtml, templateCss, settings);
-  },
-
-  escapeHtml(str) {
-    return String(str || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+  hexToRgb(hex, fallback = [0, 0, 0]) {
+    if (!hex || typeof hex !== 'string') return fallback;
+    hex = hex.replace('#', '').trim();
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    if (hex.length !== 6) return fallback;
+    const num = parseInt(hex, 16);
+    if (isNaN(num)) return fallback;
+    return [
+      Math.round(((num >> 16) & 255) / 255 * 1000) / 1000,
+      Math.round(((num >> 8) & 255) / 255 * 1000) / 1000,
+      Math.round((num & 255) / 255 * 1000) / 1000
+    ];
   }
 };
+
+/**
+ * PDF Layout & Stream Compiler
+ */
+class PdfBuilder {
+  constructor(pageWidth, pageHeight, margin, contentWidth, accentRgb, title, settings) {
+    this.pageWidth = pageWidth;
+    this.pageHeight = pageHeight;
+    this.margin = margin;
+    this.contentWidth = contentWidth;
+    this.accentRgb = accentRgb;
+    this.title = title;
+    this.settings = settings;
+
+    this.pages = [];
+    this.currentOps = [];
+    this.currentY = pageHeight - margin;
+    this.pageCount = 0;
+
+    this.startNewPage(true);
+  }
+
+  startNewPage(isFirst = false) {
+    if (this.currentOps.length > 0) {
+      this.pages.push(this.currentOps.join('\n'));
+    }
+    this.currentOps = [];
+    this.currentY = this.pageHeight - this.margin;
+    this.pageCount++;
+
+    // Draw running header on subsequent pages
+    if (!isFirst && this.settings.headerStyle !== 'none') {
+      const topY = this.pageHeight - this.margin + 12;
+      // Divider rule
+      this.currentOps.push(`0.85 0.88 0.92 RG 0.5 w`);
+      this.currentOps.push(`${this.margin} ${topY - 4} m ${this.pageWidth - this.margin} ${topY - 4} l S`);
+
+      // Header title
+      const truncTitle = this.truncateText(this.title, this.contentWidth - 80, 8);
+      this.currentOps.push(`BT /F1 8 Tf 0.45 0.52 0.6 rg`);
+      this.currentOps.push(`${this.margin} ${topY} Td (${this.escapePdf(truncTitle)}) Tj ET`);
+
+      // Header date
+      const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      const dateW = this.measureText(dateStr, 8);
+      this.currentOps.push(`BT /F1 8 Tf 0.45 0.52 0.6 rg`);
+      this.currentOps.push(`${this.pageWidth - this.margin - dateW} ${topY} Td (${this.escapePdf(dateStr)}) Tj ET`);
+
+      this.currentY -= 16;
+    }
+  }
+
+  ensureSpace(neededHeight) {
+    const bottomLimit = this.margin + 32;
+    if (this.currentY - neededHeight < bottomLimit) {
+      this.startNewPage(false);
+    }
+  }
+
+  drawDocumentHeader(titleText, doc, mode) {
+    const titleLines = this.wrapText(titleText, this.contentWidth, 18);
+    const needed = (titleLines.length * 24) + 36;
+    this.ensureSpace(needed);
+
+    // Title text
+    for (const line of titleLines) {
+      this.currentOps.push(`BT /F2 18 Tf 0.08 0.12 0.18 rg`);
+      this.currentOps.push(`${this.margin} ${this.currentY} Td (${this.escapePdf(line)}) Tj ET`);
+      this.currentY -= 24;
+    }
+
+    // Accent Underline
+    this.currentOps.push(`${this.accentRgb.join(' ')} RG 2.25 w`);
+    this.currentOps.push(`${this.margin} ${this.currentY + 8} m ${this.margin + 64} ${this.currentY + 8} l S`);
+    this.currentY -= 10;
+
+    // Meta Badge
+    const stats = (doc && doc.stats) ? doc.stats : {};
+    const dateStr = (doc && doc.createdAt) 
+      ? new Date(doc.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+      : new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    const metaStr = `${dateStr}   •   ${mode.toUpperCase()}   •   ~${stats.totalWords || 0} words   •   ${stats.totalTurns || 0} turns`;
+
+    this.currentOps.push(`BT /F1 8.5 Tf 0.45 0.52 0.6 rg`);
+    this.currentOps.push(`${this.margin} ${this.currentY} Td (${this.escapePdf(metaStr)}) Tj ET`);
+    this.currentY -= 26;
+  }
+
+  drawPromptBox(questionText) {
+    if (!questionText) return;
+    const lines = this.wrapText(questionText, this.contentWidth - 28, 10);
+    const boxH = 14 + (lines.length * 15) + 10;
+    this.ensureSpace(boxH + 16);
+
+    // Background fill & border
+    this.currentOps.push(`0.975 0.98 0.99 rg 0.88 0.91 0.94 RG 0.5 w`);
+    this.currentOps.push(`${this.margin} ${this.currentY - boxH} ${this.contentWidth} ${boxH} re B`);
+
+    // Accent Left Stripe
+    this.currentOps.push(`${this.accentRgb.join(' ')} rg`);
+    this.currentOps.push(`${this.margin} ${this.currentY - boxH} 3.5 ${boxH} re f`);
+
+    // Label: PROMPT
+    this.currentOps.push(`BT /F2 7.5 Tf ${this.accentRgb.join(' ')} rg`);
+    this.currentOps.push(`${this.margin + 12} ${this.currentY - 13} Td (PROMPT) Tj ET`);
+
+    // Question lines
+    let lineY = this.currentY - 26;
+    for (const l of lines) {
+      this.currentOps.push(`BT /F1 10 Tf 0.1 0.12 0.16 rg`);
+      this.currentOps.push(`${this.margin + 12} ${lineY} Td (${this.escapePdf(l)}) Tj ET`);
+      lineY -= 15;
+    }
+
+    this.currentY -= (boxH + 18);
+  }
+
+  drawTurnHeader(badgeText, isUser) {
+    this.ensureSpace(24);
+    const badgeW = this.measureText(badgeText.toUpperCase(), 7.5) + 12;
+    const badgeH = 14;
+
+    if (isUser) {
+      this.currentOps.push(`${this.accentRgb.join(' ')} rg`);
+      this.currentOps.push(`${this.margin} ${this.currentY - badgeH} ${badgeW} ${badgeH} re f`);
+      this.currentOps.push(`BT /F2 7.5 Tf 1 1 1 rg`);
+      this.currentOps.push(`${this.margin + 6} ${this.currentY - 10} Td (${this.escapePdf(badgeText.toUpperCase())}) Tj ET`);
+    } else {
+      this.currentOps.push(`0.91 0.93 0.95 rg`);
+      this.currentOps.push(`${this.margin} ${this.currentY - badgeH} ${badgeW} ${badgeH} re f`);
+      this.currentOps.push(`BT /F2 7.5 Tf 0.25 0.3 0.36 rg`);
+      this.currentOps.push(`${this.margin + 6} ${this.currentY - 10} Td (${this.escapePdf(badgeText.toUpperCase())}) Tj ET`);
+    }
+    this.currentY -= 20;
+  }
+
+  drawCompactRow(badgeText, blocks) {
+    this.drawTurnHeader(badgeText || 'Note', false);
+    if (Array.isArray(blocks)) {
+      for (const b of blocks) {
+        this.drawBlock(b);
+      }
+    }
+  }
+
+  drawBlock(block) {
+    if (!block) return;
+
+    switch (block.type) {
+      case 'paragraph': {
+        const text = block.text || '';
+        const lines = this.wrapText(text, this.contentWidth, 9.5);
+        this.ensureSpace(lines.length * 14 + 6);
+        for (const line of lines) {
+          this.currentOps.push(`BT /F1 9.5 Tf 0.12 0.15 0.2 rg`);
+          this.currentOps.push(`${this.margin} ${this.currentY} Td (${this.escapePdf(line)}) Tj ET`);
+          this.currentY -= 14;
+        }
+        this.currentY -= 6;
+        break;
+      }
+
+      case 'heading': {
+        const level = block.level || 2;
+        const text = block.text || '';
+        if (level === 1) {
+          const lines = this.wrapText(text, this.contentWidth, 14);
+          this.ensureSpace(lines.length * 18 + 14);
+          this.currentY -= 8;
+          for (const line of lines) {
+            this.currentOps.push(`BT /F2 14 Tf 0.08 0.12 0.18 rg`);
+            this.currentOps.push(`${this.margin} ${this.currentY} Td (${this.escapePdf(line)}) Tj ET`);
+            this.currentY -= 18;
+          }
+          this.currentY -= 4;
+        } else if (level === 2) {
+          const lines = this.wrapText(text, this.contentWidth, 12);
+          this.ensureSpace(lines.length * 16 + 14);
+          this.currentY -= 6;
+          for (const line of lines) {
+            this.currentOps.push(`BT /F2 12 Tf 0.1 0.14 0.22 rg`);
+            this.currentOps.push(`${this.margin} ${this.currentY} Td (${this.escapePdf(line)}) Tj ET`);
+            this.currentY -= 16;
+          }
+          // Subtle underline for H2
+          this.currentOps.push(`0.88 0.91 0.94 RG 0.5 w`);
+          this.currentOps.push(`${this.margin} ${this.currentY + 10} m ${this.pageWidth - this.margin} ${this.currentY + 10} l S`);
+          this.currentY -= 4;
+        } else {
+          const lines = this.wrapText(text, this.contentWidth, 10.5);
+          this.ensureSpace(lines.length * 14 + 10);
+          this.currentY -= 4;
+          for (const line of lines) {
+            this.currentOps.push(`BT /F2 10.5 Tf 0.15 0.18 0.25 rg`);
+            this.currentOps.push(`${this.margin} ${this.currentY} Td (${this.escapePdf(line)}) Tj ET`);
+            this.currentY -= 14;
+          }
+          this.currentY -= 2;
+        }
+        break;
+      }
+
+      case 'key-points': {
+        const title = block.title || 'KEY POINTS';
+        const items = (block.list && Array.isArray(block.list.items))
+          ? block.list.items.map(it => (typeof it === 'string' ? it : it.text || ''))
+          : [];
+        this.drawKeyPointsBox(title, items);
+        break;
+      }
+
+      case 'list': {
+        const items = Array.isArray(block.items)
+          ? block.items.map(it => (typeof it === 'string' ? it : it.text || ''))
+          : [];
+        const isOrdered = Boolean(block.ordered);
+        this.drawListItems(items, isOrdered);
+        break;
+      }
+
+      case 'code-highlight':
+      case 'code': {
+        const codeContent = block.code || (block.codeBlock ? block.codeBlock.code : '') || '';
+        const lang = block.language || (block.codeBlock ? block.codeBlock.language : '') || '';
+        this.drawXcodeCodeBlock(codeContent, lang);
+        break;
+      }
+
+      case 'table': {
+        const headers = Array.isArray(block.headers) ? block.headers : [];
+        const rows = Array.isArray(block.rows) ? block.rows : [];
+        this.drawTable(headers, rows);
+        break;
+      }
+
+      case 'quote': {
+        const text = block.text || '';
+        const lines = this.wrapText(text, this.contentWidth - 18, 9.5);
+        this.ensureSpace(lines.length * 14 + 12);
+        const boxH = lines.length * 14 + 4;
+
+        // Gray left stripe
+        this.currentOps.push(`0.65 0.7 0.76 RG 2 w`);
+        this.currentOps.push(`${this.margin + 2} ${this.currentY - boxH + 8} m ${this.margin + 2} ${this.currentY + 4} l S`);
+
+        for (const line of lines) {
+          this.currentOps.push(`BT /F3 9.5 Tf 0.35 0.4 0.48 rg`);
+          this.currentOps.push(`${this.margin + 12} ${this.currentY} Td (${this.escapePdf(line)}) Tj ET`);
+          this.currentY -= 14;
+        }
+        this.currentY -= 8;
+        break;
+      }
+    }
+  }
+
+  drawKeyPointsBox(title, items) {
+    if (!items || items.length === 0) return;
+    const itemLinesList = items.map(it => this.wrapText(it, this.contentWidth - 36, 9.5));
+    const totalLines = itemLinesList.reduce((acc, l) => acc + l.length, 0);
+    const boxH = 22 + (totalLines * 14) + (items.length * 4) + 8;
+    this.ensureSpace(boxH + 14);
+
+    // Box fill & border
+    this.currentOps.push(`0.975 0.98 0.99 rg 0.88 0.91 0.94 RG 0.5 w`);
+    this.currentOps.push(`${this.margin} ${this.currentY - boxH} ${this.contentWidth} ${boxH} re B`);
+
+    // Title
+    this.currentOps.push(`BT /F2 8 Tf ${this.accentRgb.join(' ')} rg`);
+    this.currentOps.push(`${this.margin + 14} ${this.currentY - 14} Td (${this.escapePdf(title.toUpperCase())}) Tj ET`);
+
+    let curItY = this.currentY - 28;
+    for (let i = 0; i < items.length; i++) {
+      const lines = itemLinesList[i];
+      // Accent bullet dot
+      this.currentOps.push(`${this.accentRgb.join(' ')} rg`);
+      this.currentOps.push(`${this.margin + 14} ${curItY - 2} 3 3 re f`);
+
+      for (let j = 0; j < lines.length; j++) {
+        this.currentOps.push(`BT /F1 9.5 Tf 0.12 0.16 0.22 rg`);
+        this.currentOps.push(`${this.margin + 24} ${curItY} Td (${this.escapePdf(lines[j])}) Tj ET`);
+        curItY -= 14;
+      }
+      curItY -= 4;
+    }
+    this.currentY -= (boxH + 16);
+  }
+
+  drawListItems(items, isOrdered) {
+    for (let i = 0; i < items.length; i++) {
+      const text = items[i];
+      const prefix = isOrdered ? `${i + 1}.` : '•';
+      const lines = this.wrapText(text, this.contentWidth - 20, 9.5);
+      this.ensureSpace(lines.length * 14 + 4);
+
+      // Bullet / Number prefix
+      this.currentOps.push(`BT /F2 9.5 Tf ${this.accentRgb.join(' ')} rg`);
+      this.currentOps.push(`${this.margin + 4} ${this.currentY} Td (${this.escapePdf(prefix)}) Tj ET`);
+
+      // Text lines
+      for (let j = 0; j < lines.length; j++) {
+        this.currentOps.push(`BT /F1 9.5 Tf 0.12 0.16 0.22 rg`);
+        this.currentOps.push(`${this.margin + 20} ${this.currentY} Td (${this.escapePdf(lines[j])}) Tj ET`);
+        this.currentY -= 14;
+      }
+      this.currentY -= 3;
+    }
+    this.currentY -= 6;
+  }
+
+  drawXcodeCodeBlock(codeText, language) {
+    const rawLines = codeText ? codeText.split('\n') : [''];
+    const headerH = 18;
+    const lineH = 12;
+    const gutterW = 28;
+    const maxChars = Math.floor((this.contentWidth - gutterW - 14) / 4.8);
+
+    // Expand lines if wrapped
+    const processedLines = [];
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i].replace(/\t/g, '    ');
+      if (line.length <= maxChars) {
+        processedLines.push({ num: i + 1, text: line });
+      } else {
+        // Wrap long code line
+        for (let k = 0; k < line.length; k += maxChars) {
+          processedLines.push({
+            num: k === 0 ? i + 1 : '',
+            text: line.slice(k, k + maxChars)
+          });
+        }
+      }
+    }
+
+    // Header space check
+    this.ensureSpace(headerH + (Math.min(processedLines.length, 3) * lineH));
+
+    // Draw Window Header Bar
+    this.currentOps.push(`0.94 0.95 0.96 rg 0.82 0.85 0.88 RG 0.5 w`);
+    this.currentOps.push(`${this.margin} ${this.currentY - headerH} ${this.contentWidth} ${headerH} re B`);
+
+    // Authentic Apple Dots: Close (Red), Minimize (Yellow), Zoom (Green)
+    this.currentOps.push(`1.0 0.37 0.34 rg`);
+    this.currentOps.push(`${this.margin + 8} ${this.currentY - 11} 5.5 5.5 re f`);
+    this.currentOps.push(`1.0 0.74 0.18 rg`);
+    this.currentOps.push(`${this.margin + 17} ${this.currentY - 11} 5.5 5.5 re f`);
+    this.currentOps.push(`0.15 0.79 0.25 rg`);
+    this.currentOps.push(`${this.margin + 26} ${this.currentY - 11} 5.5 5.5 re f`);
+
+    // Language Badge
+    if (language) {
+      const langBadge = language.toUpperCase();
+      const badgeW = this.measureText(langBadge, 7.5, true) + 8;
+      this.currentOps.push(`0.88 0.9 0.92 rg`);
+      this.currentOps.push(`${this.margin + this.contentWidth - badgeW - 8} ${this.currentY - 14} ${badgeW} 10 re f`);
+      this.currentOps.push(`BT /F5 7.5 Tf 0.35 0.42 0.5 rg`);
+      this.currentOps.push(`${this.margin + this.contentWidth - badgeW - 4} ${this.currentY - 11.5} Td (${this.escapePdf(langBadge)}) Tj ET`);
+    }
+    this.currentY -= headerH;
+
+    // Code Lines Loop with multi-page splitting
+    for (let i = 0; i < processedLines.length; i++) {
+      this.ensureSpace(lineH);
+      const item = processedLines[i];
+
+      // Gutter Background
+      this.currentOps.push(`0.97 0.975 0.985 rg`);
+      this.currentOps.push(`${this.margin} ${this.currentY - lineH} ${gutterW} ${lineH} re f`);
+
+      // Gutter vertical separator line
+      this.currentOps.push(`0.88 0.9 0.93 RG 0.5 w`);
+      this.currentOps.push(`${this.margin + gutterW} ${this.currentY - lineH} m ${this.margin + gutterW} ${this.currentY} l S`);
+
+      // Line Number in gutter
+      if (item.num !== '') {
+        const numStr = String(item.num);
+        const numW = this.measureText(numStr, 7.5, true);
+        this.currentOps.push(`BT /F4 7.5 Tf 0.6 0.65 0.72 rg`);
+        this.currentOps.push(`${this.margin + gutterW - numW - 4} ${this.currentY - 9} Td (${numStr}) Tj ET`);
+      }
+
+      // Code text
+      this.currentOps.push(`BT /F4 8 Tf 0.12 0.15 0.2 rg`);
+      this.currentOps.push(`${this.margin + gutterW + 6} ${this.currentY - 9} Td (${this.escapePdf(item.text)}) Tj ET`);
+
+      this.currentY -= lineH;
+    }
+
+    // Outer code frame
+    this.currentOps.push(`0.85 0.88 0.91 RG 0.5 w`);
+    this.currentY -= 14;
+  }
+
+  drawTable(headers, rows) {
+    if (!headers || headers.length === 0) return;
+    const colCount = Math.max(headers.length, 1);
+    const colW = this.contentWidth / colCount;
+    const rowH = 18;
+
+    this.ensureSpace(rowH * 2);
+
+    // Header row background
+    this.currentOps.push(`0.94 0.95 0.97 rg 0.82 0.85 0.88 RG 0.5 w`);
+    this.currentOps.push(`${this.margin} ${this.currentY - rowH} ${this.contentWidth} ${rowH} re B`);
+
+    for (let c = 0; c < headers.length; c++) {
+      const cellX = this.margin + (c * colW);
+      if (c > 0) {
+        this.currentOps.push(`0.82 0.85 0.88 RG 0.5 w`);
+        this.currentOps.push(`${cellX} ${this.currentY - rowH} m ${cellX} ${this.currentY} l S`);
+      }
+      const text = this.truncateText(String(headers[c] || ''), colW - 8, 8);
+      this.currentOps.push(`BT /F2 8 Tf 0.1 0.14 0.2 rg`);
+      this.currentOps.push(`${cellX + 5} ${this.currentY - 12.5} Td (${this.escapePdf(text)}) Tj ET`);
+    }
+    this.currentY -= rowH;
+
+    // Data rows
+    for (let r = 0; r < rows.length; r++) {
+      this.ensureSpace(rowH);
+      const row = rows[r];
+      const bg = (r % 2 === 0) ? `1.0 1.0 1.0` : `0.975 0.98 0.99`;
+      this.currentOps.push(`${bg} rg 0.88 0.91 0.94 RG 0.5 w`);
+      this.currentOps.push(`${this.margin} ${this.currentY - rowH} ${this.contentWidth} ${rowH} re B`);
+
+      for (let c = 0; c < colCount; c++) {
+        const cellX = this.margin + (c * colW);
+        if (c > 0) {
+          this.currentOps.push(`0.88 0.91 0.94 RG 0.5 w`);
+          this.currentOps.push(`${cellX} ${this.currentY - rowH} m ${cellX} ${this.currentY} l S`);
+        }
+        const val = (row && row[c] !== undefined) ? String(row[c]) : '';
+        const text = this.truncateText(val, colW - 8, 8);
+        this.currentOps.push(`BT /F1 8 Tf 0.15 0.18 0.22 rg`);
+        this.currentOps.push(`${cellX + 5} ${this.currentY - 12.5} Td (${this.escapePdf(text)}) Tj ET`);
+      }
+      this.currentY -= rowH;
+    }
+    this.currentY -= 14;
+  }
+
+  wrapText(text, maxWidth, fontSize) {
+    if (!text) return [];
+    const words = String(text).split(/\s+/);
+    const lines = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const candidate = currentLine ? `${currentLine} ${word}` : word;
+      if (this.measureText(candidate, fontSize) <= maxWidth) {
+        currentLine = candidate;
+      } else {
+        if (currentLine) lines.push(currentLine);
+        if (this.measureText(word, fontSize) > maxWidth) {
+          let chunk = '';
+          for (const char of word) {
+            if (this.measureText(chunk + char, fontSize) <= maxWidth) {
+              chunk += char;
+            } else {
+              lines.push(chunk);
+              chunk = char;
+            }
+          }
+          currentLine = chunk;
+        } else {
+          currentLine = word;
+        }
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  }
+
+  truncateText(text, maxWidth, fontSize) {
+    if (this.measureText(text, fontSize) <= maxWidth) return text;
+    let t = text;
+    while (t.length > 0 && this.measureText(t + '...', fontSize) > maxWidth) {
+      t = t.slice(0, -1);
+    }
+    return t ? `${t}...` : '';
+  }
+
+  measureText(text, fontSize, isMono = false) {
+    if (!text) return 0;
+    if (isMono) return text.length * (fontSize * 0.6);
+    let w = 0;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (c === ' ') w += fontSize * 0.32;
+      else if ('iltjI1.,;:!|()[]{}'.indexOf(c) !== -1) w += fontSize * 0.28;
+      else if ('wmWM@#%&'.indexOf(c) !== -1) w += fontSize * 0.85;
+      else if (c >= 'A' && c <= 'Z') w += fontSize * 0.66;
+      else w += fontSize * 0.52;
+    }
+    return w;
+  }
+
+  escapePdf(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/\\/g, '\\\\')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)')
+      .replace(/[\r\n\t]/g, ' ')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2013\u2014]/g, '-')
+      .replace(/\u2022/g, '*')
+      .replace(/\u2026/g, '...')
+      .replace(/[\x00-\x1F\x7F-\xFF]/g, function(c) {
+        const code = c.charCodeAt(0);
+        if (code === 9 || code === 10 || code === 13) return ' ';
+        return '';
+      });
+  }
+
+  compilePdf() {
+    // Flush current stream to page array
+    if (this.currentOps.length > 0) {
+      this.pages.push(this.currentOps.join('\n'));
+    }
+
+    const totalPages = this.pages.length;
+
+    // Append footers to each page
+    for (let p = 0; p < totalPages; p++) {
+      const footerY = this.margin - 16;
+      const footerOps = [
+        `0.85 0.88 0.92 RG 0.5 w`,
+        `${this.margin} ${footerY + 12} m ${this.pageWidth - this.margin} ${footerY + 12} l S`,
+        `BT /F1 7.5 Tf 0.5 0.55 0.62 rg`,
+        `${this.margin} ${footerY} Td (Generated by ChatNotes   •   100% Client-Side Private Document) Tj ET`
+      ];
+
+      if (this.settings.footerStyle !== 'none') {
+        const pageStr = `Page ${p + 1} of ${totalPages}`;
+        const pageW = this.measureText(pageStr, 7.5);
+        footerOps.push(`BT /F1 7.5 Tf 0.5 0.55 0.62 rg`);
+        footerOps.push(`${this.pageWidth - this.margin - pageW} ${footerY} Td (${this.escapePdf(pageStr)}) Tj ET`);
+      }
+
+      this.pages[p] += '\n' + footerOps.join('\n');
+    }
+
+    // Assemble PDF Object Graph
+    // 1: Catalog
+    // 2: Pages
+    // 3.. (Page & Content streams)
+    // Fonts: F1..F5
+    // Info object
+    const objects = [];
+    const pageObjNums = [];
+
+    // Object numbering plan:
+    // 1: Catalog
+    // 2: Pages
+    // For each page:
+    //   pageObjNum = 3 + (i * 2)
+    //   contentObjNum = 3 + (i * 2) + 1
+    // After pages:
+    //   Font F1
+    //   Font F2
+    //   Font F3
+    //   Font F4
+    //   Font F5
+    //   Info
+
+    let nextObjNum = 3;
+    const contentObjNums = [];
+    for (let i = 0; i < totalPages; i++) {
+      const pNum = nextObjNum++;
+      const cNum = nextObjNum++;
+      pageObjNums.push(pNum);
+      contentObjNums.push(cNum);
+    }
+
+    const f1Num = nextObjNum++;
+    const f2Num = nextObjNum++;
+    const f3Num = nextObjNum++;
+    const f4Num = nextObjNum++;
+    const f5Num = nextObjNum++;
+    const infoNum = nextObjNum++;
+
+    // 1 0 obj: Catalog
+    objects.push({
+      num: 1,
+      body: `<< /Type /Catalog /Pages 2 0 R >>`
+    });
+
+    // 2 0 obj: Pages
+    const kidsStr = pageObjNums.map(n => `${n} 0 R`).join(' ');
+    objects.push({
+      num: 2,
+      body: `<< /Type /Pages /Kids [${kidsStr}] /Count ${totalPages} >>`
+    });
+
+    // Page and Content objects
+    for (let i = 0; i < totalPages; i++) {
+      const pNum = pageObjNums[i];
+      const cNum = contentObjNums[i];
+      const streamData = this.pages[i];
+      const streamLen = streamData.length;
+
+      // Page Object
+      objects.push({
+        num: pNum,
+        body: `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${this.pageWidth.toFixed(2)} ${this.pageHeight.toFixed(2)}] /Contents ${cNum} 0 R /Resources << /Font << /F1 ${f1Num} 0 R /F2 ${f2Num} 0 R /F3 ${f3Num} 0 R /F4 ${f4Num} 0 R /F5 ${f5Num} 0 R >> >> >>`
+      });
+
+      // Content Stream Object
+      objects.push({
+        num: cNum,
+        body: `<< /Length ${streamLen} >>\nstream\n${streamData}\nendstream`
+      });
+    }
+
+    // Font Objects (Standard 14 PDF Type1 fonts)
+    objects.push({
+      num: f1Num,
+      body: `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>`
+    });
+    objects.push({
+      num: f2Num,
+      body: `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>`
+    });
+    objects.push({
+      num: f3Num,
+      body: `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>`
+    });
+    objects.push({
+      num: f4Num,
+      body: `<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>`
+    });
+    objects.push({
+      num: f5Num,
+      body: `<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold >>`
+    });
+
+    // Info Object
+    const dateStrPdf = `D:${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}Z`;
+    objects.push({
+      num: infoNum,
+      body: `<< /Title (${this.escapePdf(this.title)}) /Producer (ChatNotes Chrome Extension) /CreationDate (${dateStrPdf}) >>`
+    });
+
+    // Sort objects by num
+    objects.sort((a, b) => a.num - b.num);
+
+    // Serialize PDF Output
+    let pdfStr = `%PDF-1.4\n%\xE2\xE3\xCF\xD3\n`;
+    const offsets = [];
+
+    for (const obj of objects) {
+      offsets[obj.num] = pdfStr.length;
+      pdfStr += `${obj.num} 0 obj\n${obj.body}\nendobj\n`;
+    }
+
+    const startXref = pdfStr.length;
+    const totalObjsCount = objects.length + 1;
+
+    pdfStr += `xref\n0 ${totalObjsCount}\n`;
+    pdfStr += `0000000000 65535 f \n`;
+
+    for (let i = 1; i <= objects.length; i++) {
+      const off = offsets[i] || 0;
+      pdfStr += `${String(off).padStart(10, '0')} 00000 n \n`;
+    }
+
+    pdfStr += `trailer\n<< /Size ${totalObjsCount} /Root 1 0 R /Info ${infoNum} 0 R >>\nstartxref\n${startXref}\n%%EOF\n`;
+
+    // Convert string to Uint8Array binary buffer
+    const buf = new Uint8Array(pdfStr.length);
+    for (let i = 0; i < pdfStr.length; i++) {
+      buf[i] = pdfStr.charCodeAt(i) & 0xff;
+    }
+    return buf;
+  }
+}
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = PdfExporter;
