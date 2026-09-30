@@ -46,8 +46,8 @@ Choose **Option A** or **Option B**:
 
 #### Option B: Clone via Git (Developers)
 ```bash
-git clone https://github.com/YOUR_USERNAME/chatnotes.git
-cd chatnotes
+git clone https://github.com/harshithmgowda/extension1.git
+cd extension1
 ```
 
 ---
