@@ -1,0 +1,104 @@
+/* ==========================================================================
+   ChatNotes - Template: Dark Mode
+   High-contrast, sleek slate-dark backgrounds, glowing syntax.
+   ========================================================================== */
+
+.chatnotes-document.template-dark {
+  --doc-bg: #0f172a;
+  --doc-text: #cbd5e1;
+  --doc-heading: #f8fafc;
+  --doc-accent: #38bdf8;
+  --doc-border: #334155;
+  --doc-card-bg: #1e293b;
+  --doc-code-bg: #020617;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  line-height: 1.65;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-dark .doc-header {
+  border-bottom: 1px solid var(--doc-border);
+  padding-bottom: 18px;
+  margin-bottom: 28px;
+}
+
+.template-dark .doc-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--doc-heading);
+  letter-spacing: -0.5px;
+}
+
+.template-dark .doc-meta {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.template-dark h2 {
+  color: var(--doc-heading);
+  font-size: 18px;
+  margin: 26px 0 12px 0;
+}
+
+.template-dark .question-box {
+  background: var(--doc-card-bg);
+  border: 1px solid var(--doc-border);
+  border-left: 4px solid var(--doc-accent);
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.template-dark .key-points-box {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 20px 0;
+}
+
+.template-dark .key-points-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--doc-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.template-dark pre {
+  background: var(--doc-code-bg);
+  color: #e2e8f0;
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  margin: 18px 0;
+}
+
+.template-dark table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 22px 0;
+}
+
+.template-dark th {
+  background: #1e293b;
+  color: #f8fafc;
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--doc-border);
+  font-size: 12px;
+}
+
+.template-dark td {
+  padding: 10px 14px;
+  border: 1px solid var(--doc-border);
+  background: rgba(30, 41, 59, 0.4);
+}

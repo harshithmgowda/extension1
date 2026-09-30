@@ -1,13 +1,12 @@
 /**
- * ChatNotes - Popup Controller (Phase 1)
- * Handles tab detection, UI state updates, and user interaction.
+ * ChatNotes - Production Popup Controller
+ * Manages active tab discovery, content extraction orchestration, error handling, and preview handoff.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // DOM Elements
+  // Elements
   const tabStatusBadge = document.getElementById('tabStatusBadge');
   const tabStatusText = document.getElementById('tabStatusText');
-  const stateCard = document.getElementById('stateCard');
   const stateTitle = document.getElementById('stateTitle');
   const stateDesc = document.getElementById('stateDesc');
   const stateIcon = document.getElementById('stateIcon');
@@ -15,10 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const extractBtnText = document.getElementById('extractBtnText');
   const previewBtn = document.getElementById('previewBtn');
 
+  let activeTab = null;
+
   /**
-   * Check if a given URL is a valid ChatGPT domain
-   * @param {string} url
-   * @returns {boolean}
+   * Validates if a URL is a ChatGPT page
    */
   function isChatGPTUrl(url) {
     if (!url) return false;
@@ -37,90 +36,131 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
-   * Update UI to reflect whether ChatGPT is active
-   * @param {chrome.tabs.Tab|null} tab
+   * Set status error message
    */
-  function updateUIForTab(tab) {
-    const isChatGPT = tab && isChatGPTUrl(tab.url);
+  function showError(title, desc) {
+    stateTitle.textContent = title;
+    stateDesc.textContent = desc;
+    tabStatusBadge.className = 'status-badge inactive';
+    tabStatusText.textContent = 'Notice';
+    stateIcon.innerHTML = `
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    `;
+    stateIcon.style.color = '#fbbf24';
+  }
 
-    if (isChatGPT) {
-      // Status Badge
+  /**
+   * Query active tab and update UI
+   */
+  async function checkTab() {
+    try {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      activeTab = tabs && tabs[0] ? tabs[0] : null;
+
+      if (!activeTab || !isChatGPTUrl(activeTab.url)) {
+        showError(
+          'Open ChatGPT',
+          'Please navigate to a conversation on chatgpt.com to extract notes.'
+        );
+        extractBtn.disabled = true;
+        previewBtn.disabled = false; // Allow opening preview to see demo notes
+        return;
+      }
+
+      // ChatGPT Detected
       tabStatusBadge.className = 'status-badge ready';
       tabStatusText.textContent = 'ChatGPT Active';
-
-      // State Card
+      const cleanTitle = activeTab.title ? activeTab.title.replace(/\s*[-|•]\s*ChatGPT\s*$/i, '') : 'Conversation';
       stateTitle.textContent = 'Conversation Ready';
-      stateDesc.textContent = tab.title ? `"${tab.title.replace(' - ChatGPT', '')}"` : 'ChatGPT conversation detected. Ready to extract.';
-      stateIcon.innerHTML = `
-        <polyline points="20 6 9 17 4 12"></polyline>
-      `;
+      stateDesc.textContent = `"${cleanTitle}"`;
+      stateIcon.innerHTML = `<polyline points="20 6 9 17 4 12"></polyline>`;
       stateIcon.style.color = '#34d399';
 
-      // Buttons
       extractBtn.disabled = false;
       previewBtn.disabled = false;
-    } else {
-      // Status Badge
-      tabStatusBadge.className = 'status-badge inactive';
-      tabStatusText.textContent = 'Not on ChatGPT';
-
-      // State Card
-      stateTitle.textContent = 'Open ChatGPT';
-      stateDesc.textContent = 'Navigate to a conversation on chatgpt.com to extract notes.';
-      stateIcon.innerHTML = `
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      `;
-      stateIcon.style.color = '#fbbf24';
-
-      // Buttons
-      extractBtn.disabled = true;
-      previewBtn.disabled = true;
+    } catch (err) {
+      console.error('[ChatNotes] Tab query failed:', err);
+      showError('Detection Error', 'Unable to inspect tab. Please reload the page.');
     }
   }
 
-  // Detect current active tab
-  try {
-    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    updateUIForTab(activeTab);
-
-    // Verify storage API works (Phase 1 diagnostic test)
-    chrome.storage.local.set({ chatnotes_initialized: Date.now() });
-  } catch (error) {
-    console.error('[ChatNotes] Tab query failed:', error);
-    tabStatusBadge.className = 'status-badge inactive';
-    tabStatusText.textContent = 'Error';
-    stateTitle.textContent = 'Detection Error';
-    stateDesc.textContent = 'Unable to inspect current tab. Please reload the extension.';
+  /**
+   * Ensures extractor script is loaded before sending extraction message
+   */
+  async function ensureExtractorInjected(tabId) {
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['content/chatgpt-extractor.js']
+      });
+    } catch (e) {
+      // Content script may already be loaded via manifest; safe to ignore
+      console.log('[ChatNotes] Script injection fallback:', e.message);
+    }
   }
 
-  // Extract button click handler (preparatory logic for Phase 2)
+  // Handle Extraction Trigger
   extractBtn.addEventListener('click', async () => {
+    if (!activeTab || !activeTab.id) return;
+
     extractBtn.disabled = true;
     extractBtnText.textContent = 'Extracting...';
 
     try {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!activeTab || !isChatGPTUrl(activeTab.url)) {
-        throw new Error('Not on a valid ChatGPT page.');
-      }
+      await ensureExtractorInjected(activeTab.id);
 
-      // Visual confirmation for Phase 1
-      setTimeout(() => {
-        extractBtnText.textContent = 'Extracted (Phase 1 Ready)';
-        stateTitle.textContent = 'Phase 1 Validated!';
-        stateDesc.textContent = 'Extension is active and detecting tabs correctly. Ready for Phase 2 extractor.';
-      }, 600);
+      // Send extraction request to content script
+      chrome.tabs.sendMessage(activeTab.id, { action: 'EXTRACT_CONVERSATION' }, async (response) => {
+        if (chrome.runtime.lastError || !response) {
+          console.warn('[ChatNotes] Message error:', chrome.runtime.lastError);
+          showError(
+            'Extraction Notice',
+            'ChatGPT structure may have updated or the conversation is still loading. Reopen preview to check cached notes.'
+          );
+          extractBtn.disabled = false;
+          extractBtnText.textContent = 'Extract Conversation';
+          return;
+        }
+
+        if (!response.success || !response.data) {
+          showError(
+            'No Messages Found',
+            response.error || 'No conversation messages were detected on this page.'
+          );
+          extractBtn.disabled = false;
+          extractBtnText.textContent = 'Extract Conversation';
+          return;
+        }
+
+        // Save extracted conversation document to storage
+        await chrome.storage.local.set({ active_document: response.data });
+
+        extractBtnText.textContent = 'Extracted!';
+        stateTitle.textContent = 'Ready for Export';
+        stateDesc.textContent = `Captured ${response.data.messages ? response.data.messages.length : 0} messages. Opening Studio...`;
+
+        // Automatically open the full preview studio tab
+        setTimeout(() => {
+          chrome.tabs.create({ url: chrome.runtime.getURL('preview/preview.html') });
+          window.close();
+        }, 400);
+      });
     } catch (err) {
       console.error('[ChatNotes] Extraction trigger error:', err);
-      extractBtnText.textContent = 'Extract Conversation';
+      showError('Extraction Error', 'Unable to communicate with ChatGPT page.');
       extractBtn.disabled = false;
+      extractBtnText.textContent = 'Extract Conversation';
     }
   });
 
-  // Preview button click handler
+  // Handle Preview Open Trigger
   previewBtn.addEventListener('click', () => {
-    console.log('[ChatNotes] Preview requested.');
+    chrome.tabs.create({ url: chrome.runtime.getURL('preview/preview.html') });
+    window.close();
   });
+
+  // Run initial check
+  checkTab();
 });

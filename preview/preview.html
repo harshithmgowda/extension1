@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNotes — Document Preview & Studio</title>
+  <link rel="stylesheet" href="preview.css">
+  <!-- Embedded Template Stylesheets for Dynamic Preview Switching -->
+  <link id="templateStyleLink" rel="stylesheet" href="../templates/academic.css">
+</head>
+<body>
+  <div class="studio-layout">
+    <!-- Left Sidebar: Controls & Customizer -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="logo-box">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">ChatNotes Studio</h1>
+            <p class="brand-sub">Visual Customizer & Exporter</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Scroll Area -->
+      <div class="sidebar-content">
+        <!-- 1. Export Mode -->
+        <section class="control-group">
+          <label class="group-label">1. Document Structure Mode</label>
+          <div class="segmented-control">
+            <button class="seg-btn active" data-mode="study">
+              <span>⭐ Study Notes</span>
+            </button>
+            <button class="seg-btn" data-mode="exact">
+              <span>💬 Exact</span>
+            </button>
+            <button class="seg-btn" data-mode="compact">
+              <span>⚡ Compact</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 2. Templates -->
+        <section class="control-group">
+          <label class="group-label">2. Design Template</label>
+          <div class="template-grid">
+            <button class="tpl-card active" data-template="academic">
+              <span class="tpl-icon">📘</span>
+              <span class="tpl-name">Academic</span>
+            </button>
+            <button class="tpl-card" data-template="minimal">
+              <span class="tpl-icon">✨</span>
+              <span class="tpl-name">Minimal</span>
+            </button>
+            <button class="tpl-card" data-template="developer">
+              <span class="tpl-icon">💻</span>
+              <span class="tpl-name">Developer</span>
+            </button>
+            <button class="tpl-card" data-template="premium">
+              <span class="tpl-icon">🌟</span>
+              <span class="tpl-name">Premium</span>
+            </button>
+            <button class="tpl-card" data-template="notebook">
+              <span class="tpl-icon">📓</span>
+              <span class="tpl-name">Notebook</span>
+            </button>
+            <button class="tpl-card" data-template="dark">
+              <span class="tpl-icon">🌙</span>
+              <span class="tpl-name">Dark</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 3. Typography -->
+        <section class="control-group">
+          <label class="group-label">3. Typography</label>
+          <div class="field-row">
+            <label class="field-label" for="fontFamilySelect">Font Family</label>
+            <select id="fontFamilySelect" class="form-select">
+              <option value="Inter">Inter (Modern Clean)</option>
+              <option value="Georgia">Georgia (Classic Academic)</option>
+              <option value="Merriweather">Merriweather (Book Serif)</option>
+              <option value="Roboto">Roboto (Crisp Sans)</option>
+              <option value="Poppins">Poppins (Geometric)</option>
+              <option value="Arial">Arial (Standard)</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="JetBrains Mono">JetBrains Mono (Code)</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <div class="slider-header">
+              <label class="field-label" for="fontSizeInput">Font Size</label>
+              <span id="fontSizeVal" class="slider-val">14px</span>
+            </div>
+            <input type="range" id="fontSizeInput" min="11" max="18" value="14" class="form-range">
+          </div>
+        </section>
+
+        <!-- 4. Borders & Page Setup -->
+        <section class="control-group">
+          <label class="group-label">4. Page Setup & Borders</label>
+          <div class="grid-2col">
+            <div class="field-col">
+              <label class="field-label" for="pageSizeSelect">Page Size</label>
+              <select id="pageSizeSelect" class="form-select">
+                <option value="A4">A4</option>
+                <option value="Letter">US Letter</option>
+                <option value="A5">A5</option>
+              </select>
+            </div>
+            <div class="field-col">
+              <label class="field-label" for="orientationSelect">Orientation</label>
+              <select id="orientationSelect" class="form-select">
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <div class="field-col">
+              <label class="field-label" for="marginsSelect">Margins</label>
+              <select id="marginsSelect" class="form-select">
+                <option value="small">Small (12mm)</option>
+                <option value="normal" selected>Normal (20mm)</option>
+                <option value="large">Large (28mm)</option>
+              </select>
+            </div>
+            <div class="field-col">
+              <label class="field-label" for="borderStyleSelect">Border Style</label>
+              <select id="borderStyleSelect" class="form-select">
+                <option value="simple" selected>Simple</option>
+                <option value="none">None</option>
+                <option value="rounded">Rounded</option>
+                <option value="double">Double</option>
+                <option value="notebook">Notebook</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Header & Footer -->
+        <section class="control-group">
+          <label class="group-label">5. Headers & Footers</label>
+          <div class="grid-2col">
+            <div class="field-col">
+              <label class="field-label" for="headerStyleSelect">Header</label>
+              <select id="headerStyleSelect" class="form-select">
+                <option value="title" selected>Document Title</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div class="field-col">
+              <label class="field-label" for="footerStyleSelect">Footer</label>
+              <select id="footerStyleSelect" class="form-select">
+                <option value="page-numbers" selected>Page Numbers</option>
+                <option value="title">Document Title</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. Colors -->
+        <section class="control-group">
+          <label class="group-label">6. Color Accents</label>
+          <div class="color-palette">
+            <button class="color-swatch active" data-color="#4f46e5" style="background: #4f46e5;"></button>
+            <button class="color-swatch" data-color="#2563eb" style="background: #2563eb;"></button>
+            <button class="color-swatch" data-color="#0284c7" style="background: #0284c7;"></button>
+            <button class="color-swatch" data-color="#059669" style="background: #059669;"></button>
+            <button class="color-swatch" data-color="#d97706" style="background: #d97706;"></button>
+            <button class="color-swatch" data-color="#dc2626" style="background: #dc2626;"></button>
+            <input type="color" id="customColorPicker" value="#4f46e5" title="Choose custom accent">
+          </div>
+        </section>
+      </div>
+
+      <!-- Export Action Bar -->
+      <div class="sidebar-footer">
+        <label class="group-label">Export Notes</label>
+        <div class="export-grid">
+          <button id="exportPdfBtn" class="btn btn-export btn-pdf">
+            <span class="btn-export-icon">📄</span>
+            <span>Export PDF</span>
+          </button>
+          <button id="exportDocxBtn" class="btn btn-export btn-docx">
+            <span class="btn-export-icon">📝</span>
+            <span>Export DOCX</span>
+          </button>
+          <button id="exportMdBtn" class="btn btn-export btn-md">
+            <span class="btn-export-icon">📋</span>
+            <span>Markdown</span>
+          </button>
+          <button id="exportHtmlBtn" class="btn btn-export btn-html">
+            <span class="btn-export-icon">🌐</span>
+            <span>HTML</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center/Right Canvas: Live Sheet Preview -->
+    <main class="preview-stage">
+      <div class="stage-toolbar">
+        <div class="stage-info">
+          <span id="docTitleDisplay" class="stage-title">Notes Preview</span>
+          <span id="docMetaDisplay" class="stage-stats">Loading...</span>
+        </div>
+        <div class="stage-actions">
+          <button id="resetDemoBtn" class="btn-secondary-sm">Reload Demo Sample</button>
+        </div>
+      </div>
+
+      <!-- Document Sheet Container -->
+      <div class="sheet-viewport">
+        <div id="paperSheet" class="paper-sheet size-a4 orientation-portrait border-simple">
+          <div id="documentContent" class="chatnotes-document template-academic">
+            <!-- Dynamic Document Content Injected Here -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../core/parser.js"></script>
+  <script src="../core/formatter.js"></script>
+  <script src="../core/storage.js"></script>
+  <script src="../export/markdown.js"></script>
+  <script src="../export/html.js"></script>
+  <script src="../export/pdf.js"></script>
+  <script src="../export/docx.js"></script>
+  <script src="preview.js"></script>
+</body>
+</html>

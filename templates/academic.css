@@ -1,0 +1,129 @@
+/* ==========================================================================
+   ChatNotes - Template: Academic
+   Clean, authoritative, study-optimized layout with clear sectioning.
+   ========================================================================== */
+
+.chatnotes-document.template-academic {
+  --doc-bg: #ffffff;
+  --doc-text: #1e293b;
+  --doc-heading: #0f172a;
+  --doc-accent: #2563eb;
+  --doc-accent-light: #eff6ff;
+  --doc-border: #e2e8f0;
+  --doc-code-bg: #f8fafc;
+  --doc-card-bg: #ffffff;
+
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.65;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-academic .doc-header {
+  border-bottom: 2px solid var(--doc-accent);
+  padding-bottom: 18px;
+  margin-bottom: 28px;
+}
+
+.template-academic .doc-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--doc-heading);
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.template-academic .doc-meta {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  gap: 16px;
+}
+
+/* Headings */
+.template-academic h1, 
+.template-academic h2, 
+.template-academic h3 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--doc-heading);
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.template-academic h2 {
+  font-size: 18px;
+  border-bottom: 1px solid var(--doc-border);
+  padding-bottom: 6px;
+}
+
+/* Question Callout */
+.template-academic .question-box {
+  background: var(--doc-accent-light);
+  border-left: 4px solid var(--doc-accent);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 0 4px 4px 0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+/* Key Points Card */
+.template-academic .key-points-box {
+  background: #f8fafc;
+  border: 1px solid var(--doc-border);
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin: 16px 0;
+}
+
+.template-academic .key-points-title {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--doc-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* Code Blocks */
+.template-academic pre {
+  background: var(--doc-code-bg);
+  border: 1px solid var(--doc-border);
+  border-radius: 4px;
+  padding: 14px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 16px 0;
+}
+
+/* Tables */
+.template-academic table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+}
+
+.template-academic th {
+  background: #f1f5f9;
+  color: var(--doc-heading);
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--doc-border);
+  font-weight: 600;
+}
+
+.template-academic td {
+  padding: 8px 12px;
+  border: 1px solid var(--doc-border);
+}
+
+.template-academic tr:nth-child(even) td {
+  background: #fcfcfd;
+}

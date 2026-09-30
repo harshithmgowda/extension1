@@ -17,12 +17,35 @@
       "128": "assets/icons/icon-128.png"
     }
   },
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["content/chatgpt-extractor.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://chat.openai.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "templates/*",
+        "assets/icons/*"
+      ],
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"]
+    }
   ]
 }

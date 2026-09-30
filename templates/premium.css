@@ -1,0 +1,106 @@
+/* ==========================================================================
+   ChatNotes - Template: Premium
+   Executive cards, soft shadows, vibrant gradients, high-end feel.
+   ========================================================================== */
+
+.chatnotes-document.template-premium {
+  --doc-bg: #f8fafc;
+  --doc-text: #334155;
+  --doc-heading: #1e1b4b;
+  --doc-accent: #6366f1;
+  --doc-border: rgba(99, 102, 241, 0.15);
+  --doc-card-bg: #ffffff;
+  --doc-code-bg: #1e293b;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  line-height: 1.65;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-premium .doc-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
+}
+
+.template-premium .doc-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.template-premium .doc-meta {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+}
+
+.template-premium .question-box {
+  background: var(--doc-card-bg);
+  border: 1px solid var(--doc-border);
+  border-left: 5px solid var(--doc-accent);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  color: #312e81;
+}
+
+.template-premium .key-points-box {
+  background: #fdf4ff;
+  border: 1px solid #f0abfc;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 20px 0;
+}
+
+.template-premium .key-points-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #a21caf;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.template-premium pre {
+  background: var(--doc-code-bg);
+  color: #f8fafc;
+  border-radius: 10px;
+  padding: 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  margin: 20px 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.template-premium table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 22px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.template-premium th {
+  background: #f1f5f9;
+  color: #1e293b;
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.template-premium td {
+  padding: 10px 14px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
+}

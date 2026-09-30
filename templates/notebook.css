@@ -1,0 +1,104 @@
+/* ==========================================================================
+   ChatNotes - Template: Notebook
+   Paper-like appearance, ruled styling, handwritten-inspired headers.
+   ========================================================================== */
+
+.chatnotes-document.template-notebook {
+  --doc-bg: #fffdf9;
+  --doc-text: #2d3748;
+  --doc-heading: #744210;
+  --doc-accent: #dd6b20;
+  --doc-border: #fbd38d;
+  --doc-code-bg: #fefcbf;
+
+  font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
+  line-height: 1.7;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+  border: 2px dashed #ecc94b;
+  border-radius: 8px;
+  padding: 32px 36px;
+  position: relative;
+}
+
+.template-notebook::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 28px;
+  width: 2px;
+  background: #feb2b2;
+}
+
+.template-notebook .doc-header {
+  border-bottom: 2px solid #ecc94b;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.template-notebook .doc-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--doc-heading);
+}
+
+.template-notebook .doc-meta {
+  font-family: sans-serif;
+  font-size: 11px;
+  color: #a0aec0;
+}
+
+.template-notebook .question-box {
+  background: #fffaf0;
+  border: 1px solid #feebc8;
+  border-left: 6px solid #ed8936;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  color: #7b341e;
+  font-weight: 600;
+}
+
+.template-notebook .key-points-box {
+  background: #fffff0;
+  border: 1px dashed #d69e2e;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 18px 0;
+}
+
+.template-notebook .key-points-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #b7791f;
+  margin-bottom: 8px;
+}
+
+.template-notebook pre {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 12.5px;
+  margin: 18px 0;
+}
+
+.template-notebook table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.template-notebook th {
+  background: #feebc8;
+  color: #744210;
+  padding: 8px 12px;
+  border: 1px solid #fbd38d;
+}
+
+.template-notebook td {
+  padding: 8px 12px;
+  border: 1px solid #feebc8;
+}
