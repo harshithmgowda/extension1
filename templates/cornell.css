@@ -1,0 +1,136 @@
+/* ==========================================================================
+   ChatNotes - Template: Cornell Notes
+   Gold standard revision layout: Cue/Prompt Column, Comprehensive Notes, 
+   and dedicated Summary Section.
+   ========================================================================== */
+
+.chatnotes-document.template-cornell {
+  --doc-bg: #ffffff;
+  --doc-text: #1f2937;
+  --doc-heading: #111827;
+  --doc-accent: #4338ca;
+  --doc-border: #d1d5db;
+  --doc-card-bg: #f9fafb;
+  --doc-code-bg: #f3f4f6;
+
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif);
+  line-height: 1.65;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+  border-left: 2px solid #ef4444;
+  padding-left: 24px;
+}
+
+.template-cornell .doc-header {
+  border-bottom: 2px solid var(--doc-accent);
+  padding-bottom: 18px;
+  margin-bottom: 28px;
+}
+
+.template-cornell .doc-title {
+  font-family: var(--doc-font, sans-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--doc-accent);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.template-cornell .doc-meta {
+  font-size: 11.5px;
+  color: #6b7280;
+}
+
+.template-cornell .study-card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px dashed var(--doc-border);
+}
+
+.template-cornell .question-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #16a34a;
+  border-radius: 6px;
+  padding: 12px 14px;
+  height: fit-content;
+  position: sticky;
+  top: 10px;
+}
+
+.template-cornell .q-label {
+  color: #15803d;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.template-cornell .q-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #14532d;
+  line-height: 1.45;
+}
+
+.template-cornell .answer-blocks {
+  min-width: 0;
+}
+
+.template-cornell h2 {
+  font-size: 17px;
+  color: var(--doc-accent);
+  margin-top: 18px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.template-cornell .key-points-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin: 18px 0;
+}
+
+.template-cornell .key-points-title {
+  color: #4338ca;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.template-cornell table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 12.5px;
+}
+
+.template-cornell th {
+  background: #e0e7ff;
+  color: #312e81;
+  padding: 8px 12px;
+  border: 1px solid #c7d2fe;
+  text-align: left;
+  font-weight: 600;
+}
+
+.template-cornell td {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.template-cornell blockquote {
+  border-left: 3px solid #6366f1;
+  background: #f5f3ff;
+  padding: 10px 14px;
+  margin: 16px 0;
+  border-radius: 0 4px 4px 0;
+}

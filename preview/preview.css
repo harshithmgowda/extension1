@@ -25,6 +25,7 @@
   --apple-blue-hover: #0077ed;
 
   --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --doc-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 * {
@@ -314,6 +315,12 @@ body {
 .theme-swatch.premium { background: #6366f1; }
 .theme-swatch.notebook { background: #dd6b20; }
 .theme-swatch.dark { background: #1e293b; }
+.theme-swatch.editorial { background: #881337; }
+.theme-swatch.cyberpunk { background: #00f0ff; box-shadow: 0 0 6px rgba(0, 240, 255, 0.6); }
+.theme-nordic-swatch, .theme-swatch.nordic { background: #0284c7; }
+.theme-swatch.notion { background: #37352f; }
+.theme-swatch.solarized { background: #cb4b16; }
+.theme-swatch.cornell { background: #4338ca; }
 
 /* Form Controls */
 .row-control {
@@ -453,6 +460,16 @@ body {
 
 .chatnotes-document {
   width: 100%;
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.chatnotes-document p,
+.chatnotes-document li,
+.chatnotes-document td,
+.chatnotes-document th,
+.chatnotes-document blockquote,
+.chatnotes-document .q-text {
+  font-family: var(--doc-font, inherit);
 }
 
 /* Apple Document Typography & Components */
@@ -512,42 +529,278 @@ body {
   line-height: 1.5;
 }
 
-/* Apple Code Block (Xcode Playground Style) */
-.chatnotes-document .code-wrapper {
-  background: #f7f7f9;
-  border: 1px solid rgba(0, 0, 0, 0.07);
-  border-radius: 8px;
+/* ==========================================================================
+   Apple Xcode Playground / Code Editor Style
+   ========================================================================== */
+
+.xcode-window {
+  background: #fbfbfd;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 9px;
   overflow: hidden;
   margin: 22px 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
 }
 
-.chatnotes-document .code-header-bar {
+.xcode-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 14px;
-  background: rgba(0, 0, 0, 0.02);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 8px 14px;
+  background: linear-gradient(180deg, #fdfdfe 0%, #f4f4f6 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  user-select: none;
 }
 
-.chatnotes-document .code-lang-label {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 10.5px;
+.xcode-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 60px;
+}
+
+.xcode-dot {
+  width: 10.5px;
+  height: 10.5px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.xcode-dot.close { background: #ff5f56; border: 0.5px solid #e0443e; }
+.xcode-dot.minimize { background: #ffbd2e; border: 0.5px solid #dea123; }
+.xcode-dot.zoom { background: #27c93f; border: 0.5px solid #1aab29; }
+
+.xcode-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.xcode-lang-badge {
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #86868b;
+  letter-spacing: 0.05em;
+  color: #555558;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
-.chatnotes-document pre {
+.xcode-actions {
+  display: flex;
+  align-items: center;
+  width: 60px;
+  justify-content: flex-end;
+}
+
+.xcode-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: all 0.15s ease;
+}
+
+.xcode-copy-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.xcode-copy-btn.copied {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.xcode-copy-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.xcode-content {
+  display: flex;
+  overflow-x: auto;
+  background: #ffffff;
+  padding: 12px 0;
+}
+
+.xcode-gutter {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  user-select: none;
+  text-align: right;
+}
+
+.gutter-num {
+  font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #a1a1aa;
+}
+
+.xcode-code {
+  flex: 1;
   margin: 0;
-  padding: 16px;
+  padding: 0 16px;
   overflow-x: auto;
   font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   font-size: 12.5px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: #24292f;
   background: transparent;
+}
+
+.xcode-line {
+  white-space: pre;
+}
+
+/* Xcode Light Syntax Colors */
+.xcode-kw { color: #9b2393; font-weight: 600; }
+.xcode-str { color: #c41a16; }
+.xcode-num { color: #1c00cf; }
+.xcode-comment { color: #5d6c79; font-style: italic; }
+.xcode-func { color: #326d74; }
+.xcode-type { color: #3900a0; font-weight: 500; }
+.xcode-builtin { color: #836c28; }
+.xcode-lit { color: #1c00cf; font-weight: 500; }
+.xcode-op { color: #24292f; }
+
+/* Xcode Dark Theme Variant */
+.xcode-window.xcode-dark,
+.template-dark .xcode-window,
+.template-cyberpunk .xcode-window {
+  background: #1e1e24;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.xcode-window.xcode-dark .xcode-header,
+.template-dark .xcode-header,
+.template-cyberpunk .xcode-header {
+  background: #282830;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.xcode-window.xcode-dark .xcode-lang-badge,
+.template-dark .xcode-lang-badge,
+.template-cyberpunk .xcode-lang-badge {
+  background: rgba(255, 255, 255, 0.1);
+  color: #d1d5db;
+}
+
+.xcode-window.xcode-dark .xcode-copy-btn,
+.template-dark .xcode-copy-btn,
+.template-cyberpunk .xcode-copy-btn {
+  background: #2e2e38;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e5e7eb;
+}
+
+.xcode-window.xcode-dark .xcode-copy-btn:hover,
+.template-dark .xcode-copy-btn:hover,
+.template-cyberpunk .xcode-copy-btn:hover {
+  background: #3b3b48;
+}
+
+.xcode-window.xcode-dark .xcode-content,
+.template-dark .xcode-content,
+.template-cyberpunk .xcode-content {
+  background: #16161c;
+}
+
+.xcode-window.xcode-dark .xcode-gutter,
+.template-dark .xcode-gutter,
+.template-cyberpunk .xcode-gutter {
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+.xcode-window.xcode-dark .gutter-num,
+.template-dark .gutter-num,
+.template-cyberpunk .gutter-num {
+  color: #6b7280;
+}
+
+.xcode-window.xcode-dark .xcode-code,
+.template-dark .xcode-code,
+.template-cyberpunk .xcode-code {
+  color: #e5e7eb;
+}
+
+/* Xcode Dark Syntax Colors */
+.xcode-window.xcode-dark .xcode-kw,
+.template-dark .xcode-kw,
+.template-cyberpunk .xcode-kw { color: #fc5fa3; }
+
+.xcode-window.xcode-dark .xcode-str,
+.template-dark .xcode-str,
+.template-cyberpunk .xcode-str { color: #fc6a5d; }
+
+.xcode-window.xcode-dark .xcode-num,
+.template-dark .xcode-num,
+.template-cyberpunk .xcode-num { color: #9686f5; }
+
+.xcode-window.xcode-dark .xcode-comment,
+.template-dark .xcode-comment,
+.template-cyberpunk .xcode-comment { color: #6c7986; }
+
+.xcode-window.xcode-dark .xcode-func,
+.template-dark .xcode-func,
+.template-cyberpunk .xcode-func { color: #67b7a4; }
+
+.xcode-window.xcode-dark .xcode-type,
+.template-dark .xcode-type,
+.template-cyberpunk .xcode-type { color: #a167e6; }
+
+.xcode-window.xcode-dark .xcode-builtin,
+.template-dark .xcode-builtin,
+.template-cyberpunk .xcode-builtin { color: #cca551; }
+
+.xcode-window.xcode-dark .xcode-lit,
+.template-dark .xcode-lit,
+.template-cyberpunk .xcode-lit { color: #9686f5; }
+
+.xcode-window.xcode-dark .xcode-op,
+.template-dark .xcode-op,
+.template-cyberpunk .xcode-op { color: #e5e7eb; }
+
+/* Toast Notifications */
+.chatnotes-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1f2937;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.chatnotes-toast.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Key Points Callout */
@@ -651,4 +904,159 @@ body {
   font-style: italic;
   color: #555558;
 }
+
+/* ==========================================================================
+   4. NATIVE BROWSER PRINT & PDF EXPORT OPTIMIZATIONS
+   ========================================================================== */
+
+/* Elements hidden on screen, visible only when printing */
+.print-only-header,
+.print-only-footer {
+  display: none !important;
+}
+
+@media print {
+  /* Hide all app chrome, window titlebar, sidebar inspector, action buttons, and toasts */
+  .mac-titlebar,
+  .sidebar-inspector,
+  .chatnotes-toast,
+  .xcode-actions,
+  .xcode-copy-btn {
+    display: none !important;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .mac-app,
+  .workspace-body,
+  .document-stage,
+  .canvas-scroll {
+    display: block !important;
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    transform: none !important;
+  }
+
+  .paper-sheet,
+  .paper-sheet.size-a4.orientation-portrait,
+  .paper-sheet.size-a4.orientation-landscape,
+  .paper-sheet.size-letter.orientation-portrait,
+  .paper-sheet.size-letter.orientation-landscape,
+  .paper-sheet.size-a5.orientation-portrait,
+  .paper-sheet.size-a5.orientation-landscape {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: transparent !important;
+  }
+
+  .chatnotes-document {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Prevent awkward mid-element page breaks */
+  .question-box,
+  .key-points-box,
+  .xcode-window,
+  table,
+  blockquote,
+  .study-card,
+  .user-turn,
+  .assistant-turn {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* Xcode code block print styling */
+  .xcode-window {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+    margin: 16px 0 !important;
+  }
+
+  .xcode-header {
+    background: #e2e8f0 !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    padding: 6px 12px !important;
+  }
+
+  .xcode-dot {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .xcode-content {
+    background: #ffffff !important;
+    padding: 10px 0 !important;
+  }
+
+  .xcode-gutter {
+    border-right: 1px solid #e2e8f0 !important;
+  }
+
+  .xcode-code {
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+  }
+
+  .xcode-line {
+    white-space: pre-wrap !important;
+  }
+
+  /* Print Header & Footer Emulation */
+  .print-only-header {
+    display: flex !important;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    color: #94a3b8;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+    margin-bottom: 18px;
+  }
+
+  .print-only-footer {
+    display: flex !important;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 4px;
+    margin-top: 24px;
+  }
+}
+
 

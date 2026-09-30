@@ -1,6 +1,6 @@
 /**
  * ChatNotes - Studio & Preview Controller
- * Manages live rendering, customizer events, settings persistence, and export dispatch.
+ * Manages live rendering, customizer events, settings persistence, Xcode code blocks, and export dispatch.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const templateStyleLink = document.getElementById('templateStyleLink');
   const docTitleDisplay = document.getElementById('docTitleDisplay');
   const docMetaDisplay = document.getElementById('docMetaDisplay');
-  const resetDemoBtn = document.getElementById('resetDemoBtn');
 
   // Control Elements
   const modeButtons = document.querySelectorAll('.seg-item, .seg-btn');
@@ -33,14 +32,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const exportMdBtn = document.getElementById('exportMdBtn');
   const exportHtmlBtn = document.getElementById('exportHtmlBtn');
 
-  // Built-in Demo Document for instant testing
+  // Built-in Demo Document for instant testing with multiple languages & formats
   const DEMO_DOCUMENT = {
-    title: 'Understanding Binary Search & Divide-and-Conquer',
+    title: 'Understanding Binary Search & Divide-and-Conquer Algorithms',
     createdAt: new Date().toISOString(),
     stats: {
       totalTurns: 2,
-      totalWords: 340,
-      codeBlockCount: 1,
+      totalWords: 420,
+      codeBlockCount: 2,
       tableCount: 1,
       estimatedReadTimeMinutes: 2
     },
@@ -51,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         content: [
           {
             type: 'paragraph',
-            text: 'Can you explain Binary Search, how its time complexity is calculated, and provide an implementation in Python?'
+            text: 'Can you explain Binary Search, calculate its time and space complexity, and provide clean implementations in Python and JavaScript?'
           }
         ]
       },
@@ -61,45 +60,95 @@ document.addEventListener('DOMContentLoaded', async () => {
         content: [
           {
             type: 'paragraph',
-            text: 'Binary Search is an efficient algorithm for finding an item from a sorted list of items. It works by repeatedly dividing in half the portion of the list that could contain the item until you have narrowed down the possible locations to just one.'
+            text: 'Binary Search is an optimal divide-and-conquer search algorithm designed for sorted collections. In each iteration, it halves the search interval by comparing the target value to the middle element.'
           },
           {
             type: 'list',
             ordered: false,
             items: [
-              { text: 'Requires input data to be sorted in ascending order.' },
-              { text: 'Eliminates half the search area in each step.' },
-              { text: 'Achieves logarithmic time complexity: O(log n).' },
-              { text: 'Optimal space complexity: O(1) for iterative approach.' }
+              { text: 'Requires input collection to be sorted in ascending order.' },
+              { text: 'Eliminates exactly 50% of candidate items in each comparison.' },
+              { text: 'Guarantees logarithmic time complexity: O(log n).' },
+              { text: 'Space-optimal: O(1) auxiliary memory for the iterative implementation.' }
             ]
           },
           {
             type: 'heading',
             level: 2,
-            text: 'Algorithm Complexity'
+            text: 'Complexity Analysis'
           },
           {
             type: 'table',
-            headers: ['Operation', 'Best Case', 'Average Case', 'Worst Case'],
+            headers: ['Metric', 'Best Case', 'Average Case', 'Worst Case'],
             rows: [
-              ['Search Time', 'O(1)', 'O(log n)', 'O(log n)'],
+              ['Time Complexity', 'O(1)', 'O(log n)', 'O(log n)'],
               ['Space (Iterative)', 'O(1)', 'O(1)', 'O(1)'],
-              ['Space (Recursive)', 'O(log n)', 'O(log n)', 'O(log n)']
+              ['Space (Recursive)', 'O(log n)', 'O(log n)', 'O(log n)'],
+              ['Max Comparisons (N=1,000,000)', '1', '19', '20']
             ]
           },
           {
             type: 'heading',
             level: 2,
-            text: 'Python Implementation'
+            text: 'Python Implementation (Xcode Style)'
           },
           {
             type: 'code',
             language: 'python',
-            code: 'def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    \n    while left <= right:\n        mid = left + (right - left) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n            \n    return -1  # Target not found'
+            code: `def binary_search(arr: list[int], target: int) -> int:
+    """Finds target in sorted array using binary search. Returns index or -1."""
+    left: int = 0
+    right: int = len(arr) - 1
+    
+    while left <= right:
+        # Avoid integer overflow for large indices
+        mid: int = left + (right - left) // 2
+        
+        if arr[mid] == target:
+            return mid  # Element discovered
+        elif arr[mid] < target:
+            left = mid + 1  # Discard left half
+        else:
+            right = mid - 1  # Discard right half
+            
+    return -1  # Target not found in array`
+          },
+          {
+            type: 'heading',
+            level: 2,
+            text: 'JavaScript Implementation'
+          },
+          {
+            type: 'code',
+            language: 'javascript',
+            code: `/**
+ * Performs iterative binary search on a sorted numeric array.
+ * @param {number[]} nums Sorted array of numbers
+ * @param {number} target Value to find
+ * @returns {number} Index of target or -1
+ */
+function binarySearch(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = left + Math.floor((right - left) / 2);
+
+    if (nums[mid] === target) {
+      return mid;
+    } else if (nums[mid] < target) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  return -1;
+}`
           },
           {
             type: 'quote',
-            text: 'Always calculate mid using left + (right - left) // 2 to prevent integer overflow in languages with fixed integer ranges.'
+            text: 'Key Takeaway: Always compute mid using left + (right - left) // 2 rather than (left + right) // 2 to protect against 32-bit signed integer overflow in strict memory systems.'
           }
         ]
       }
@@ -111,15 +160,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentSettings = {};
 
   /**
+   * Display floating toast notification
+   */
+  function showToast(message) {
+    const toast = document.getElementById('chatnotesToast');
+    if (!toast) return;
+    toast.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 15px; height: 15px; color: #34d399; flex-shrink: 0;">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>${escapeHtml(message)}</span>
+    `;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2500);
+  }
+
+  /**
    * Initialize state from storage
    */
   async function init() {
     currentSettings = await StorageManager.getSettings();
     const storedDoc = await StorageManager.getActiveDocument();
-    currentDoc = storedDoc ? DocumentParser.normalize(storedDoc) : DEMO_DOCUMENT;
+    currentDoc = storedDoc ? DocumentParser.normalize(storedDoc) : JSON.parse(JSON.stringify(DEMO_DOCUMENT));
 
     syncUIFromSettings();
+    applyTypography();
     renderDocument();
+    initWindowControls();
   }
 
   /**
@@ -128,20 +199,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   function syncUIFromSettings() {
     // Mode
     modeButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.mode === currentSettings.exportMode);
+      btn.classList.toggle('active', btn.dataset.mode === (currentSettings.exportMode || 'study'));
     });
 
     // Template
+    const activeTemplate = currentSettings.template || 'academic';
     templateCards.forEach(card => {
-      card.classList.toggle('active', card.dataset.template === currentSettings.template);
+      card.classList.toggle('active', card.dataset.template === activeTemplate);
     });
-    updateTemplateCssLink(currentSettings.template);
+    updateTemplateCssLink(activeTemplate);
 
     // Typography
     if (fontFamilySelect) fontFamilySelect.value = currentSettings.font || 'Inter';
     if (fontSizeInput) {
       fontSizeInput.value = currentSettings.fontSize || 14;
-      fontSizeVal.textContent = `${currentSettings.fontSize || 14}px`;
+      fontSizeVal.textContent = `${currentSettings.fontSize || 14} pt`;
     }
 
     // Page & Borders
@@ -158,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     colorSwatches.forEach(swatch => {
       swatch.classList.toggle('active', swatch.dataset.color === currentSettings.accentColor);
     });
-    if (customColorPicker) customColorPicker.value = currentSettings.accentColor || '#4f46e5';
+    if (customColorPicker) customColorPicker.value = currentSettings.accentColor || '#0071e3';
 
     applySheetContainerClasses();
   }
@@ -173,6 +245,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
+   * Applies font family and typography tokens across the preview
+   */
+  function applyTypography() {
+    const font = currentSettings.font || 'Inter';
+    const size = currentSettings.fontSize || 14;
+    const isSerif = font === 'Georgia' || font === 'Merriweather' || font === 'Playfair Display' || font === 'Times New Roman';
+    const isMono = font === 'JetBrains Mono' || font === 'Fira Code';
+    const fallback = isSerif ? 'serif' : isMono ? 'monospace' : 'sans-serif';
+    const fullFont = `'${font}', ${fallback}`;
+
+    document.documentElement.style.setProperty('--doc-font', fullFont);
+    document.documentElement.style.setProperty('--doc-accent', currentSettings.accentColor || '#0071e3');
+
+    if (paperSheet) {
+      paperSheet.style.setProperty('--doc-font', fullFont);
+      paperSheet.style.fontFamily = fullFont;
+      paperSheet.style.fontSize = `${size}px`;
+    }
+
+    if (documentContent) {
+      documentContent.style.setProperty('--doc-font', fullFont);
+      documentContent.style.fontFamily = fullFont;
+      documentContent.style.fontSize = `${size}px`;
+      documentContent.style.setProperty('--doc-accent', currentSettings.accentColor || '#0071e3');
+    }
+  }
+
+  /**
    * Applies page size, orientation, and borders to the preview paper sheet
    */
   function applySheetContainerClasses() {
@@ -181,8 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const border = currentSettings.borderStyle || 'simple';
 
     paperSheet.className = `paper-sheet size-${pSize} orientation-${orient} border-${border}`;
-    paperSheet.style.fontFamily = `'${currentSettings.font || 'Inter'}', sans-serif`;
-    paperSheet.style.fontSize = `${currentSettings.fontSize || 14}px`;
+    applyTypography();
   }
 
   /**
@@ -193,11 +292,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     docTitleDisplay.textContent = currentDoc.title || 'Untitled Notes';
     if (currentDoc.stats) {
-      docMetaDisplay.textContent = `~${currentDoc.stats.totalWords || 0} words &bull; ${currentDoc.stats.totalTurns || 0} turns`;
+      docMetaDisplay.innerHTML = `~${currentDoc.stats.totalWords || 0} words &bull; ${currentDoc.stats.totalTurns || 0} turns`;
     }
 
     // Deterministic formatting
-    const formatted = DocumentFormatter.format(currentDoc, currentSettings.exportMode);
+    const formatted = DocumentFormatter.format(currentDoc, currentSettings.exportMode || 'study');
 
     // Build HTML representation (Apple minimalist document layout)
     let html = `
@@ -247,13 +346,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     documentContent.className = `chatnotes-document template-${currentSettings.template || 'academic'}`;
     documentContent.innerHTML = html;
+
+    applyTypography();
+    wireXcodeCopyButtons();
   }
 
   /**
-   * Renders array of content blocks into HTML
+   * Renders array of content blocks into HTML with Xcode Code Blocks
    */
   function renderBlocksHtml(blocks) {
     if (!Array.isArray(blocks)) return '';
+
+    const isDark = currentSettings.template === 'dark' || currentSettings.template === 'cyberpunk';
 
     return blocks.map(block => {
       switch (block.type) {
@@ -271,12 +375,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         case 'code-highlight':
         case 'code': {
           const c = block.codeBlock || block;
+          // Render authentic Apple Xcode Playground window
+          if (typeof XcodeHighlighter !== 'undefined') {
+            return XcodeHighlighter.renderXcodeBlock(c.code, c.language || 'code', isDark);
+          }
           return `
-            <div class="code-wrapper">
-              <div class="code-header-bar">
-                <span class="code-lang-label">${escapeHtml((c.language || 'code').toUpperCase())}</span>
+            <div class="xcode-window${isDark ? ' xcode-dark' : ''}">
+              <div class="xcode-header">
+                <div class="xcode-controls">
+                  <span class="xcode-dot close"></span>
+                  <span class="xcode-dot minimize"></span>
+                  <span class="xcode-dot zoom"></span>
+                </div>
+                <div class="xcode-title">
+                  <span class="xcode-lang-badge">${escapeHtml((c.language || 'code').toUpperCase())}</span>
+                </div>
               </div>
-              <pre><code class="language-${escapeHtml(c.language)}">${escapeHtml(c.code)}</code></pre>
+              <pre class="xcode-code"><code class="language-${escapeHtml(c.language)}">${escapeHtml(c.code)}</code></pre>
             </div>
           `;
         }
@@ -295,6 +410,32 @@ document.addEventListener('DOMContentLoaded', async () => {
           return `<p>${escapeHtml(block.text || '')}</p>`;
       }
     }).join('\n');
+  }
+
+  /**
+   * Attach click handlers to all Xcode Copy buttons
+   */
+  function wireXcodeCopyButtons() {
+    document.querySelectorAll('.xcode-copy-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const rawCode = decodeURIComponent(btn.getAttribute('data-code') || '');
+        if (!rawCode) return;
+
+        navigator.clipboard.writeText(rawCode).then(() => {
+          btn.classList.add('copied');
+          const textSpan = btn.querySelector('.copy-text');
+          if (textSpan) textSpan.textContent = 'Copied!';
+          showToast('Code copied to clipboard');
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            if (textSpan) textSpan.textContent = 'Copy';
+          }, 2000);
+        }).catch(err => {
+          console.warn('[ChatNotes] Clipboard write error:', err);
+        });
+      });
+    });
   }
 
   function renderListHtml(listBlock) {
@@ -332,14 +473,55 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   async function fetchActiveTemplateCss() {
     try {
-      const res = await fetch(`../templates/${currentSettings.template}.css`);
+      const res = await fetch(`../templates/${currentSettings.template || 'academic'}.css`);
       return await res.text();
     } catch {
       return '';
     }
   }
 
-  // Event Listeners: Export Mode Switch
+  /**
+   * Window Controls (macOS Traffic Light dots)
+   */
+  function initWindowControls() {
+    const closeDot = document.querySelector('.win-dot.close');
+    const minDot = document.querySelector('.win-dot.minimize');
+    const maxDot = document.querySelector('.win-dot.maximize');
+    const sidebar = document.querySelector('.sidebar-inspector');
+
+    if (closeDot) {
+      closeDot.addEventListener('click', () => {
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.close();
+        }
+      });
+    }
+
+    if (minDot && sidebar) {
+      minDot.addEventListener('click', () => {
+        sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none';
+        showToast(sidebar.style.display === 'none' ? 'Inspector hidden' : 'Inspector shown');
+      });
+    }
+
+    if (maxDot) {
+      maxDot.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+    }
+  }
+
+  // =========================================================================
+  // EVENT LISTENERS: CUSTOMIZATION CONTROLS
+  // =========================================================================
+
+  // Export Mode Switch
   modeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       modeButtons.forEach(b => b.classList.remove('active'));
@@ -347,10 +529,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentSettings.exportMode = btn.dataset.mode;
       StorageManager.saveSettings(currentSettings);
       renderDocument();
+      showToast(`Mode: ${btn.dataset.mode.toUpperCase()}`);
     });
   });
 
-  // Event Listeners: Template Switch
+  // Template Switch (12 Themes)
   templateCards.forEach(card => {
     card.addEventListener('click', () => {
       templateCards.forEach(c => c.classList.remove('active'));
@@ -359,45 +542,52 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateTemplateCssLink(currentSettings.template);
       StorageManager.saveSettings(currentSettings);
       renderDocument();
+      showToast(`Theme: ${card.dataset.template.toUpperCase()}`);
     });
   });
 
-  // Event Listeners: Typography & Font Family
+  // Typography & Font Family
   fontFamilySelect.addEventListener('change', (e) => {
     currentSettings.font = e.target.value;
-    applySheetContainerClasses();
+    applyTypography();
     StorageManager.saveSettings(currentSettings);
+    renderDocument();
+    showToast(`Font: ${currentSettings.font}`);
   });
 
   fontSizeInput.addEventListener('input', (e) => {
     currentSettings.fontSize = parseInt(e.target.value, 10);
-    fontSizeVal.textContent = `${currentSettings.fontSize}px`;
-    applySheetContainerClasses();
+    fontSizeVal.textContent = `${currentSettings.fontSize} pt`;
+    applyTypography();
     StorageManager.saveSettings(currentSettings);
   });
 
-  // Event Listeners: Page Setup & Borders
+  // Page Setup & Borders
   pageSizeSelect.addEventListener('change', (e) => {
     currentSettings.pageSize = e.target.value;
     applySheetContainerClasses();
     StorageManager.saveSettings(currentSettings);
+    showToast(`Paper: ${e.target.value}`);
   });
 
   orientationSelect.addEventListener('change', (e) => {
     currentSettings.orientation = e.target.value;
     applySheetContainerClasses();
     StorageManager.saveSettings(currentSettings);
+    showToast(`Orientation: ${e.target.value}`);
   });
 
   marginsSelect.addEventListener('change', (e) => {
     currentSettings.margins = e.target.value;
     StorageManager.saveSettings(currentSettings);
+    showToast(`Margins: ${e.target.value}`);
   });
 
   borderStyleSelect.addEventListener('change', (e) => {
     currentSettings.borderStyle = e.target.value;
     applySheetContainerClasses();
     StorageManager.saveSettings(currentSettings);
+    showToast(`Border: ${e.target.value}`);
   });
 
   headerStyleSelect.addEventListener('change', (e) => {
@@ -410,58 +600,60 @@ document.addEventListener('DOMContentLoaded', async () => {
     StorageManager.saveSettings(currentSettings);
   });
 
-  // Event Listeners: Color Accents
+  // Color Accents
   colorSwatches.forEach(swatch => {
     swatch.addEventListener('click', () => {
       colorSwatches.forEach(s => s.classList.remove('active'));
       swatch.classList.add('active');
       currentSettings.accentColor = swatch.dataset.color;
-      documentContent.style.setProperty('--doc-accent', currentSettings.accentColor);
+      applyTypography();
       StorageManager.saveSettings(currentSettings);
+      showToast(`Accent tint applied`);
     });
   });
 
   customColorPicker.addEventListener('input', (e) => {
     currentSettings.accentColor = e.target.value;
-    documentContent.style.setProperty('--doc-accent', currentSettings.accentColor);
+    applyTypography();
     StorageManager.saveSettings(currentSettings);
   });
 
-  // Reset Demo Sample
-  resetDemoBtn.addEventListener('click', () => {
-    currentDoc = DEMO_DOCUMENT;
-    renderDocument();
-  });
-
   // =========================================================================
-  // EXPORT HANDLERS
+  // EXPORT HANDLERS (Markdown, HTML, DOCX, PDF)
   // =========================================================================
 
-  // 1. Export PDF
+  // 1. Export PDF (Direct Print & Save as PDF - 100% exact pages, zero blank pages)
   exportPdfBtn.addEventListener('click', async () => {
+    showToast('Opening PDF print preview...');
     const templateCss = await fetchActiveTemplateCss();
     PdfExporter.export(currentDoc, documentContent.innerHTML, templateCss, currentSettings);
   });
 
   // 2. Export DOCX
   exportDocxBtn.addEventListener('click', () => {
-    const filename = `${(currentDoc.title || 'notes').replace(/[^a-z0-9_-]/gi, '_')}.docx`;
-    DocxExporter.download(currentDoc, currentSettings.exportMode, filename);
+    const safeTitle = (currentDoc.title || 'notes').replace(/[^a-z0-9_-]/gi, '_');
+    const filename = `${safeTitle}.docx`;
+    DocxExporter.download(currentDoc, currentSettings.exportMode || 'study', filename, currentSettings);
+    showToast(`Downloaded ${filename}`);
   });
 
   // 3. Export Markdown
   exportMdBtn.addEventListener('click', () => {
-    const mdText = MarkdownExporter.generate(currentDoc, currentSettings.exportMode);
-    const filename = `${(currentDoc.title || 'notes').replace(/[^a-z0-9_-]/gi, '_')}.md`;
+    const mdText = MarkdownExporter.generate(currentDoc, currentSettings.exportMode || 'study');
+    const safeTitle = (currentDoc.title || 'notes').replace(/[^a-z0-9_-]/gi, '_');
+    const filename = `${safeTitle}.md`;
     MarkdownExporter.download(mdText, filename);
+    showToast(`Downloaded ${filename}`);
   });
 
   // 4. Export HTML
   exportHtmlBtn.addEventListener('click', async () => {
     const templateCss = await fetchActiveTemplateCss();
     const htmlString = HtmlExporter.generate(currentDoc, documentContent.innerHTML, templateCss, currentSettings);
-    const filename = `${(currentDoc.title || 'notes').replace(/[^a-z0-9_-]/gi, '_')}.html`;
+    const safeTitle = (currentDoc.title || 'notes').replace(/[^a-z0-9_-]/gi, '_');
+    const filename = `${safeTitle}.html`;
     HtmlExporter.download(htmlString, filename);
+    showToast(`Downloaded ${filename}`);
   });
 
   // Boot

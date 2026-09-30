@@ -12,7 +12,7 @@
   --doc-card-bg: #ffffff;
   --doc-code-bg: #1e293b;
 
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif);
   line-height: 1.65;
   color: var(--doc-text);
   background: var(--doc-bg);

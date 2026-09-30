@@ -1,0 +1,128 @@
+/* ==========================================================================
+   ChatNotes - Template: Notion Style
+   Subtle minimalist borders, modern sans typography, iconic callout blocks.
+   ========================================================================== */
+
+.chatnotes-document.template-notion {
+  --doc-bg: #ffffff;
+  --doc-text: #37352f;
+  --doc-heading: #37352f;
+  --doc-accent: #2eaadc;
+  --doc-border: rgba(55, 53, 47, 0.12);
+  --doc-card-bg: #f7f6f3;
+  --doc-code-bg: #f7f6f3;
+
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif);
+  line-height: 1.65;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-notion .doc-header {
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--doc-border);
+}
+
+.template-notion .doc-title {
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--doc-heading);
+  margin-bottom: 6px;
+}
+
+.template-notion .doc-meta {
+  font-size: 12px;
+  color: rgba(55, 53, 47, 0.65);
+  display: flex;
+  gap: 12px;
+}
+
+.template-notion h1,
+.template-notion h2,
+.template-notion h3 {
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, sans-serif);
+  color: var(--doc-heading);
+  font-weight: 600;
+  margin-top: 26px;
+  margin-bottom: 8px;
+}
+
+.template-notion h2 {
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+
+.template-notion .question-box {
+  background: #f7f6f3;
+  border: 1px solid var(--doc-border);
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-notion .q-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(55, 53, 47, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.template-notion .q-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--doc-heading);
+}
+
+.template-notion .key-points-box {
+  background: #fbfbfa;
+  border: 1px solid rgba(55, 53, 47, 0.15);
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin: 20px 0;
+}
+
+.template-notion .key-points-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0b6e99;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.template-notion table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 13px;
+}
+
+.template-notion th {
+  background: #f7f6f3;
+  color: var(--doc-heading);
+  text-align: left;
+  padding: 8px 12px;
+  border: 1px solid var(--doc-border);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.template-notion td {
+  padding: 8px 12px;
+  border: 1px solid var(--doc-border);
+}
+
+.template-notion blockquote {
+  border-left: 3px solid #37352f;
+  padding-left: 14px;
+  margin: 16px 0;
+  color: rgba(55, 53, 47, 0.8);
+  font-style: normal;
+}

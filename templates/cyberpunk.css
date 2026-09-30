@@ -1,0 +1,141 @@
+/* ==========================================================================
+   ChatNotes - Template: Cyberpunk Terminal
+   Neon cyan & magenta glows, dark obsidian chassis, high-tech matrix styling.
+   ========================================================================== */
+
+.chatnotes-document.template-cyberpunk {
+  --doc-bg: #090d16;
+  --doc-text: #c8d3f5;
+  --doc-heading: #fdfdfd;
+  --doc-accent: #00f0ff;
+  --doc-accent-pink: #ff007f;
+  --doc-border: rgba(0, 240, 255, 0.2);
+  --doc-card-bg: #0f172a;
+  --doc-code-bg: #030712;
+
+  font-family: var(--doc-font, 'JetBrains Mono', 'Fira Code', monospace);
+  line-height: 1.65;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-cyberpunk .doc-header {
+  border-bottom: 2px solid var(--doc-accent);
+  box-shadow: 0 4px 15px rgba(0, 240, 255, 0.15);
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.template-cyberpunk .doc-title {
+  font-family: var(--doc-font, 'JetBrains Mono', monospace);
+  font-size: 26px;
+  font-weight: 800;
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.template-cyberpunk .doc-title::before {
+  content: "SYS:// ";
+  color: var(--doc-accent-pink);
+  font-weight: 400;
+}
+
+.template-cyberpunk .doc-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #828bb8;
+}
+
+.template-cyberpunk h1,
+.template-cyberpunk h2,
+.template-cyberpunk h3 {
+  font-family: var(--doc-font, 'JetBrains Mono', monospace);
+  color: #ffffff;
+  margin-top: 26px;
+  margin-bottom: 12px;
+}
+
+.template-cyberpunk h2 {
+  font-size: 17px;
+  color: #ff007f;
+  text-shadow: 0 0 8px rgba(255, 0, 127, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.template-cyberpunk h2::before {
+  content: "▶";
+  font-size: 12px;
+  color: var(--doc-accent);
+}
+
+.template-cyberpunk .question-box {
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid var(--doc-border);
+  border-left: 4px solid var(--doc-accent);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.08);
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+
+.template-cyberpunk .q-label {
+  color: var(--doc-accent);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.template-cyberpunk .q-text {
+  color: #e0f2fe;
+  font-size: 14.5px;
+}
+
+.template-cyberpunk .key-points-box {
+  background: rgba(255, 0, 127, 0.04);
+  border: 1px solid rgba(255, 0, 127, 0.25);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 22px 0;
+}
+
+.template-cyberpunk .key-points-title {
+  color: var(--doc-accent-pink);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+.template-cyberpunk table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 12.5px;
+}
+
+.template-cyberpunk th {
+  background: #0f172a;
+  color: var(--doc-accent);
+  padding: 10px 12px;
+  border: 1px solid var(--doc-border);
+  text-align: left;
+}
+
+.template-cyberpunk td {
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 240, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.template-cyberpunk blockquote {
+  border-left: 2px solid var(--doc-accent-pink);
+  background: rgba(255, 0, 127, 0.03);
+  padding: 10px 16px;
+  margin: 20px 0;
+  color: #c8d3f5;
+  font-style: italic;
+}

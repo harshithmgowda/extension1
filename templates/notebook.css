@@ -11,7 +11,7 @@
   --doc-border: #fbd38d;
   --doc-code-bg: #fefcbf;
 
-  font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
+  font-family: var(--doc-font, 'Comic Sans MS', 'Segoe UI', cursive, sans-serif);
   line-height: 1.7;
   color: var(--doc-text);
   background: var(--doc-bg);

@@ -1,0 +1,128 @@
+/* ==========================================================================
+   ChatNotes - Template: Solarized Sepia
+   Gentle warm paper tones, Ethan Schoonover's precision Solarized palette.
+   ========================================================================== */
+
+.chatnotes-document.template-solarized {
+  --doc-bg: #fdf6e3;
+  --doc-text: #586e75;
+  --doc-heading: #073642;
+  --doc-accent: #268bd2;
+  --doc-orange: #cb4b16;
+  --doc-yellow: #b58900;
+  --doc-border: #eee8d5;
+  --doc-card-bg: #eee8d5;
+  --doc-code-bg: #f5eed9;
+
+  font-family: var(--doc-font, 'Merriweather', 'Georgia', serif);
+  line-height: 1.7;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-solarized .doc-header {
+  border-bottom: 2px solid var(--doc-yellow);
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.template-solarized .doc-title {
+  font-family: var(--doc-font, 'Merriweather', serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: #cb4b16;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.template-solarized .doc-meta {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11.5px;
+  color: #93a1a1;
+}
+
+.template-solarized h1,
+.template-solarized h2,
+.template-solarized h3 {
+  font-family: var(--doc-font, 'Merriweather', serif);
+  color: var(--doc-heading);
+  margin-top: 26px;
+  margin-bottom: 12px;
+}
+
+.template-solarized h2 {
+  font-size: 18px;
+  color: #268bd2;
+  border-bottom: 1px solid var(--doc-border);
+  padding-bottom: 6px;
+}
+
+.template-solarized .question-box {
+  background: #eee8d5;
+  border-left: 4px solid var(--doc-orange);
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+
+.template-solarized .q-label {
+  color: var(--doc-orange);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.template-solarized .q-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #073642;
+}
+
+.template-solarized .key-points-box {
+  background: rgba(181, 137, 0, 0.08);
+  border: 1px solid rgba(181, 137, 0, 0.25);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 22px 0;
+}
+
+.template-solarized .key-points-title {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #b58900;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.template-solarized table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 22px 0;
+  font-size: 13px;
+}
+
+.template-solarized th {
+  background: #eee8d5;
+  color: #073642;
+  padding: 10px 12px;
+  border: 1px solid #e0d8c0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.template-solarized td {
+  padding: 8px 12px;
+  border: 1px solid #e0d8c0;
+}
+
+.template-solarized blockquote {
+  border-left: 3px solid #2aa198;
+  padding-left: 14px;
+  margin: 18px 0;
+  color: #2aa198;
+  font-style: italic;
+}

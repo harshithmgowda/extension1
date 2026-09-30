@@ -1,0 +1,137 @@
+/* ==========================================================================
+   ChatNotes - Template: Nordic Clean
+   Scandinavian minimalism, soothing arctic blue, airy pill cards.
+   ========================================================================== */
+
+.chatnotes-document.template-nordic {
+  --doc-bg: #f8fafc;
+  --doc-text: #334155;
+  --doc-heading: #0f172a;
+  --doc-accent: #0284c7;
+  --doc-accent-soft: #e0f2fe;
+  --doc-border: #e2e8f0;
+  --doc-card-bg: #ffffff;
+  --doc-code-bg: #f1f5f9;
+
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif);
+  line-height: 1.7;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-nordic .doc-header {
+  background: #ffffff;
+  border: 1px solid var(--doc-border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.template-nordic .doc-title {
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0369a1;
+  margin-bottom: 8px;
+}
+
+.template-nordic .doc-meta {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.template-nordic h1,
+.template-nordic h2,
+.template-nordic h3 {
+  font-family: var(--doc-font, -apple-system, BlinkMacSystemFont, sans-serif);
+  color: var(--doc-heading);
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.template-nordic h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.template-nordic .question-box {
+  background: #ffffff;
+  border: 1px solid var(--doc-border);
+  border-left: 5px solid var(--doc-accent);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.template-nordic .q-label {
+  color: var(--doc-accent);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.template-nordic .q-text {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.template-nordic .key-points-box {
+  background: var(--doc-accent-soft);
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 22px 0;
+}
+
+.template-nordic .key-points-title {
+  color: #0369a1;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.template-nordic table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 22px 0;
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.template-nordic th {
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.template-nordic td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--doc-border);
+  background: #ffffff;
+}
+
+.template-nordic blockquote {
+  border-left: 3px solid #38bdf8;
+  background: #f0f9ff;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 18px;
+  margin: 20px 0;
+  color: #0369a1;
+}

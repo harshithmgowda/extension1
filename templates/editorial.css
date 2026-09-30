@@ -1,0 +1,138 @@
+/* ==========================================================================
+   ChatNotes - Template: Editorial / Executive
+   Classic typography, warm ivory canvas, rich wine accents, literary prestige.
+   ========================================================================== */
+
+.chatnotes-document.template-editorial {
+  --doc-bg: #fcfbf7;
+  --doc-text: #22252a;
+  --doc-heading: #1a1c20;
+  --doc-accent: #881337;
+  --doc-accent-light: #fff1f2;
+  --doc-border: #e2ddd5;
+  --doc-card-bg: #ffffff;
+  --doc-code-bg: #f5f2eb;
+
+  font-family: var(--doc-font, 'Playfair Display', 'Merriweather', 'Georgia', serif);
+  line-height: 1.75;
+  color: var(--doc-text);
+  background: var(--doc-bg);
+}
+
+.template-editorial .doc-header {
+  border-top: 3px double var(--doc-accent);
+  border-bottom: 3px double var(--doc-accent);
+  padding: 24px 0;
+  margin-bottom: 36px;
+  text-align: center;
+}
+
+.template-editorial .doc-title {
+  font-family: var(--doc-font, 'Playfair Display', 'Georgia', serif);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--doc-heading);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.template-editorial .doc-meta {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #78716c;
+  justify-content: center;
+}
+
+.template-editorial h1,
+.template-editorial h2,
+.template-editorial h3 {
+  font-family: var(--doc-font, 'Playfair Display', 'Georgia', serif);
+  color: var(--doc-heading);
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+.template-editorial h2 {
+  font-size: 20px;
+  border-bottom: 1px solid var(--doc-border);
+  padding-bottom: 8px;
+}
+
+.template-editorial .question-box {
+  background: var(--doc-accent-light);
+  border: 1px solid rgba(136, 19, 55, 0.2);
+  border-left: 4px solid var(--doc-accent);
+  padding: 16px 20px;
+  margin-bottom: 26px;
+  border-radius: 4px;
+}
+
+.template-editorial .q-label {
+  color: var(--doc-accent);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.template-editorial .q-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #4c0519;
+}
+
+.template-editorial .key-points-box {
+  background: #ffffff;
+  border: 1px solid var(--doc-border);
+  border-radius: 4px;
+  padding: 18px 24px;
+  margin: 22px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.template-editorial .key-points-title {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--doc-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.template-editorial table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 13px;
+}
+
+.template-editorial th {
+  background: #f5f2eb;
+  color: var(--doc-heading);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 10px 14px;
+  border-top: 1px solid var(--doc-heading);
+  border-bottom: 2px solid var(--doc-heading);
+}
+
+.template-editorial td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--doc-border);
+}
+
+.template-editorial blockquote {
+  font-family: var(--doc-font, 'Playfair Display', Georgia, serif);
+  font-size: 16px;
+  font-style: italic;
+  border-left: 3px solid var(--doc-accent);
+  padding: 8px 20px;
+  margin: 24px 0;
+  color: #475569;
+}

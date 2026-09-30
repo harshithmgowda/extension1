@@ -75,15 +75,26 @@ const MarkdownExporter = {
         const hashes = '#'.repeat(Math.min(Math.max(block.level || 2, 1), 6));
         return `${hashes} ${block.text || ''}`;
       }
-      case 'code': {
-        const lang = block.language || '';
-        return `\`\`\`${lang}\n${block.code || ''}\n\`\`\``;
+      case 'code':
+      case 'code-highlight': {
+        const c = block.codeBlock || block;
+        const lang = c.language || '';
+        return `\`\`\`${lang}\n${c.code || ''}\n\`\`\``;
+      }
+      case 'key-points': {
+        const lines = [`### ${block.title || 'Key Points'}`];
+        if (block.list) {
+          lines.push(this.renderList(block.list));
+        }
+        return lines.join('\n\n');
       }
       case 'list': {
         return this.renderList(block);
       }
-      case 'table': {
-        return this.renderTable(block);
+      case 'table':
+      case 'table-highlight': {
+        const t = block.tableBlock || block;
+        return this.renderTable(t);
       }
       case 'quote': {
         return `> ${block.text || ''}`;

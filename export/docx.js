@@ -10,10 +10,11 @@ const DocxExporter = {
    * @param {object} doc Structured document model
    * @param {'exact'|'study'|'compact'} mode
    * @param {string} filename
+   * @param {object} settings Customization settings
    */
-  download(doc, mode = 'study', filename = 'notes.docx') {
-    const xmlContent = this.generateDocumentXml(doc, mode);
-    const zipBlob = this.buildDocxZip(xmlContent, doc.title || 'ChatNotes Document');
+  download(doc, mode = 'study', filename = 'notes.docx', settings = {}) {
+    const xmlContent = this.generateDocumentXml(doc, mode, settings);
+    const zipBlob = this.buildDocxZip(xmlContent, doc.title || 'ChatNotes Document', settings);
 
     const url = URL.createObjectURL(zipBlob);
     const a = document.createElement('a');
@@ -28,10 +29,11 @@ const DocxExporter = {
   },
 
   /**
-   * Escape XML entities
+   * Escape XML entities and remove invalid XML control characters
    */
   escapeXml(str) {
     return String(str || '')
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -42,8 +44,10 @@ const DocxExporter = {
   /**
    * Generates word/document.xml content
    */
-  generateDocumentXml(doc, mode = 'study') {
+  generateDocumentXml(doc, mode = 'study', settings = {}) {
     const title = this.escapeXml(doc.title || 'Conversation Notes');
+    const docFont = settings.font || 'Calibri';
+    const accentHex = (settings.accentColor || '#0071e3').replace('#', '').toUpperCase();
     const bodyXml = [];
 
     // Title paragraph
@@ -55,9 +59,9 @@ const DocxExporter = {
         </w:pPr>
         <w:r>
           <w:rPr>
-            <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
+            <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
             <w:b/>
-            <w:color w:val="2563EB"/>
+            <w:color w:val="${accentHex}"/>
             <w:sz w:val="48"/>
           </w:rPr>
           <w:t>${title}</w:t>
@@ -65,7 +69,7 @@ const DocxExporter = {
       </w:p>
     `);
 
-    // Meta subtext
+    // Meta subtext (note: using unicode \u2022 instead of HTML &bull;)
     bodyXml.push(`
       <w:p>
         <w:pPr>
@@ -74,11 +78,12 @@ const DocxExporter = {
         </w:pPr>
         <w:r>
           <w:rPr>
+            <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
             <w:i/>
             <w:color w:val="64748B"/>
             <w:sz w:val="20"/>
           </w:rPr>
-          <w:t>Exported via ChatNotes &bull; ${new Date(doc.createdAt || Date.now()).toLocaleDateString()}</w:t>
+          <w:t>Exported via ChatNotes • ${new Date(doc.createdAt || Date.now()).toLocaleDateString()}</w:t>
         </w:r>
       </w:p>
     `);
@@ -95,15 +100,16 @@ const DocxExporter = {
             <w:p>
               <w:pPr>
                 <w:pBdr>
-                  <w:left w:val="single" w:sz="24" w:space="8" w:color="2563EB"/>
+                  <w:left w:val="single" w:sz="24" w:space="8" w:color="${accentHex}"/>
                 </w:pBdr>
-                <w:shd w:val="clear" w:color="auto" w:fill="EFF6FF"/>
-                <w:spacing w:before="200" w:after="120"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="F1F5F9"/>
+                <w:spacing w:before="240" w:after="120"/>
               </w:pPr>
               <w:r>
                 <w:rPr>
+                  <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
                   <w:b/>
-                  <w:color w:val="1E40AF"/>
+                  <w:color w:val="${accentHex}"/>
                   <w:sz w:val="26"/>
                 </w:rPr>
                 <w:t xml:space="preserve">Prompt</w:t>
@@ -114,10 +120,11 @@ const DocxExporter = {
           bodyXml.push(`
             <w:p>
               <w:pPr>
-                <w:spacing w:before="200" w:after="120"/>
+                <w:spacing w:before="240" w:after="120"/>
               </w:pPr>
               <w:r>
                 <w:rPr>
+                  <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
                   <w:b/>
                   <w:color w:val="0F172A"/>
                   <w:sz w:val="28"/>
@@ -132,7 +139,12 @@ const DocxExporter = {
           <w:p>
             <w:pPr><w:spacing w:before="180" w:after="100"/></w:pPr>
             <w:r>
-              <w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="${isUser ? '2563EB' : '10B981'}"/></w:rPr>
+              <w:rPr>
+                <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                <w:b/>
+                <w:sz w:val="24"/>
+                <w:color w:val="${isUser ? accentHex : '10B981'}"/>
+              </w:rPr>
               <w:t>${isUser ? 'User' : 'Assistant'}:</w:t>
             </w:r>
           </w:p>
@@ -147,7 +159,11 @@ const DocxExporter = {
               <w:p>
                 <w:pPr><w:spacing w:after="120" w:line="276" w:lineRule="auto"/></w:pPr>
                 <w:r>
-                  <w:rPr><w:sz w:val="22"/><w:color w:val="1E293B"/></w:rPr>
+                  <w:rPr>
+                    <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                    <w:sz w:val="22"/>
+                    <w:color w:val="1E293B"/>
+                  </w:rPr>
                   <w:t xml:space="preserve">${this.escapeXml(block.text)}</w:t>
                 </w:r>
               </w:p>
@@ -160,50 +176,82 @@ const DocxExporter = {
               <w:p>
                 <w:pPr><w:spacing w:before="200" w:after="100"/></w:pPr>
                 <w:r>
-                  <w:rPr><w:b/><w:sz w:val="${sz}"/><w:color w:val="0F172A"/></w:rPr>
+                  <w:rPr>
+                    <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                    <w:b/>
+                    <w:sz w:val="${sz}"/>
+                    <w:color w:val="0F172A"/>
+                  </w:rPr>
                   <w:t xml:space="preserve">${this.escapeXml(block.text)}</w:t>
                 </w:r>
               </w:p>
             `);
             break;
           }
-          case 'code': {
-            const lines = (block.code || '').split('\n');
+          case 'code':
+          case 'code-highlight': {
+            const c = block.codeBlock || block;
+            const lines = (c.code || '').split('\n');
+            const lang = (c.language || 'Code').toUpperCase();
+
+            // Xcode style header bar in Word
             bodyXml.push(`
               <w:p>
                 <w:pPr>
-                  <w:shd w:val="clear" w:color="auto" w:fill="F1F5F9"/>
-                  <w:spacing w:before="120" w:after="40"/>
+                  <w:pBdr>
+                    <w:top w:val="single" w:sz="6" w:space="4" w:color="CBD5E1"/>
+                    <w:left w:val="single" w:sz="18" w:space="6" w:color="${accentHex}"/>
+                    <w:right w:val="single" w:sz="6" w:space="4" w:color="CBD5E1"/>
+                  </w:pBdr>
+                  <w:shd w:val="clear" w:color="auto" w:fill="E2E8F0"/>
+                  <w:spacing w:before="160" w:after="40"/>
                 </w:pPr>
                 <w:r>
                   <w:rPr>
                     <w:rFonts w:ascii="Consolas" w:hAnsi="Consolas"/>
-                    <w:color w:val="64748B"/>
+                    <w:b/>
+                    <w:color w:val="475569"/>
                     <w:sz w:val="18"/>
                   </w:rPr>
-                  <w:t>[Code: ${this.escapeXml(block.language || 'text')}]</w:t>
+                  <w:t> Xcode [ ${this.escapeXml(lang)} ]</w:t>
                 </w:r>
               </w:p>
             `);
-            lines.forEach(line => {
+
+            // Code lines inside shaded box
+            lines.forEach((line, lineIdx) => {
+              const lineNum = String(lineIdx + 1).padStart(2, ' ');
               bodyXml.push(`
                 <w:p>
                   <w:pPr>
+                    <w:pBdr>
+                      <w:left w:val="single" w:sz="18" w:space="6" w:color="${accentHex}"/>
+                      <w:right w:val="single" w:sz="6" w:space="4" w:color="CBD5E1"/>
+                      ${lineIdx === lines.length - 1 ? `<w:bottom w:val="single" w:sz="6" w:space="4" w:color="CBD5E1"/>` : ''}
+                    </w:pBdr>
                     <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
                     <w:spacing w:after="0" w:line="220" w:lineRule="auto"/>
                   </w:pPr>
                   <w:r>
                     <w:rPr>
                       <w:rFonts w:ascii="Consolas" w:hAnsi="Consolas"/>
+                      <w:sz w:val="18"/>
+                      <w:color w:val="94A3B8"/>
+                    </w:rPr>
+                    <w:t xml:space="preserve">${lineNum} | </w:t>
+                  </w:r>
+                  <w:r>
+                    <w:rPr>
+                      <w:rFonts w:ascii="Consolas" w:hAnsi="Consolas"/>
                       <w:sz w:val="19"/>
-                      <w:color w:val="0F172A"/>
+                      <w:color w:val="1E293B"/>
                     </w:rPr>
                     <w:t xml:space="preserve">${this.escapeXml(line)}</w:t>
                   </w:r>
                 </w:p>
               `);
             });
-            bodyXml.push(`<w:p><w:pPr><w:spacing w:after="120"/></w:pPr></w:p>`);
+            bodyXml.push(`<w:p><w:pPr><w:spacing w:after="140"/></w:pPr></w:p>`);
             break;
           }
           case 'list': {
@@ -217,11 +265,19 @@ const DocxExporter = {
                     <w:spacing w:after="80"/>
                   </w:pPr>
                   <w:r>
-                    <w:rPr><w:b/><w:color w:val="2563EB"/></w:rPr>
+                    <w:rPr>
+                      <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                      <w:b/>
+                      <w:color w:val="${accentHex}"/>
+                    </w:rPr>
                     <w:t>${prefix}</w:t>
                   </w:r>
                   <w:r>
-                    <w:rPr><w:sz w:val="22"/><w:color w:val="1E293B"/></w:rPr>
+                    <w:rPr>
+                      <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                      <w:sz w:val="22"/>
+                      <w:color w:val="1E293B"/>
+                    </w:rPr>
                     <w:t xml:space="preserve">${this.escapeXml(item.text)}</w:t>
                   </w:r>
                 </w:p>
@@ -229,9 +285,87 @@ const DocxExporter = {
             });
             break;
           }
-          case 'table': {
-            const headers = Array.isArray(block.headers) ? block.headers : [];
-            const rows = Array.isArray(block.rows) ? block.rows : [];
+          case 'key-points': {
+            bodyXml.push(`
+              <w:p>
+                <w:pPr>
+                  <w:pBdr>
+                    <w:left w:val="single" w:sz="20" w:space="6" w:color="${accentHex}"/>
+                  </w:pBdr>
+                  <w:shd w:val="clear" w:color="auto" w:fill="F0F9FF"/>
+                  <w:spacing w:before="140" w:after="60"/>
+                </w:pPr>
+                <w:r>
+                  <w:rPr>
+                    <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                    <w:b/>
+                    <w:color w:val="${accentHex}"/>
+                    <w:sz w:val="22"/>
+                  </w:rPr>
+                  <w:t>${this.escapeXml(block.title || 'Key Points')}</w:t>
+                </w:r>
+              </w:p>
+            `);
+            const lItems = (block.list && Array.isArray(block.list.items)) ? block.list.items : [];
+            lItems.forEach((it, idx) => {
+              bodyXml.push(`
+                <w:p>
+                  <w:pPr>
+                    <w:pBdr>
+                      <w:left w:val="single" w:sz="20" w:space="6" w:color="${accentHex}"/>
+                    </w:pBdr>
+                    <w:shd w:val="clear" w:color="auto" w:fill="F0F9FF"/>
+                    <w:ind w:left="420" w:hanging="240"/>
+                    <w:spacing w:after="60"/>
+                  </w:pPr>
+                  <w:r>
+                    <w:rPr><w:b/><w:color w:val="${accentHex}"/></w:rPr>
+                    <w:t>• </w:t>
+                  </w:r>
+                  <w:r>
+                    <w:rPr>
+                      <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                      <w:sz w:val="22"/>
+                      <w:color w:val="1E293B"/>
+                    </w:rPr>
+                    <w:t xml:space="preserve">${this.escapeXml(it.text)}</w:t>
+                  </w:r>
+                </w:p>
+              `);
+            });
+            break;
+          }
+          case 'quote': {
+            bodyXml.push(`
+              <w:p>
+                <w:pPr>
+                  <w:pBdr>
+                    <w:left w:val="single" w:sz="24" w:space="8" w:color="94A3B8"/>
+                  </w:pBdr>
+                  <w:ind w:left="360"/>
+                  <w:spacing w:before="120" w:after="120"/>
+                </w:pPr>
+                <w:r>
+                  <w:rPr>
+                    <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/>
+                    <w:i/>
+                    <w:sz w:val="22"/>
+                    <w:color w:val="475569"/>
+                  </w:rPr>
+                  <w:t xml:space="preserve">${this.escapeXml(block.text)}</w:t>
+                </w:r>
+              </w:p>
+            `);
+            break;
+          }
+          case 'table':
+          case 'table-highlight': {
+            const tbl = block.tableBlock || block;
+            const headers = Array.isArray(tbl.headers) ? tbl.headers : [];
+            const rows = Array.isArray(tbl.rows) ? tbl.rows : [];
+            const colCount = Math.max(headers.length, rows.length > 0 ? rows[0].length : 1);
+            const colWidth = Math.floor(9000 / colCount);
+
             bodyXml.push(`
               <w:tbl>
                 <w:tblPr>
@@ -245,6 +379,9 @@ const DocxExporter = {
                     <w:insideV w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/>
                   </w:tblBorders>
                 </w:tblPr>
+                <w:tblGrid>
+                  ${Array(colCount).fill(`<w:gridCol w:w="${colWidth}"/>`).join('')}
+                </w:tblGrid>
             `);
             if (headers.length > 0) {
               bodyXml.push('<w:tr>');
@@ -252,7 +389,7 @@ const DocxExporter = {
                 bodyXml.push(`
                   <w:tc>
                     <w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="F1F5F9"/></w:tcPr>
-                    <w:p><w:r><w:rPr><w:b/><w:sz w:val="20"/><w:color w:val="0F172A"/></w:rPr><w:t>${this.escapeXml(h)}</w:t></w:r></w:p>
+                    <w:p><w:r><w:rPr><w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/><w:b/><w:sz w:val="20"/><w:color w:val="0F172A"/></w:rPr><w:t>${this.escapeXml(h)}</w:t></w:r></w:p>
                   </w:tc>
                 `);
               });
@@ -263,7 +400,7 @@ const DocxExporter = {
               r.forEach(c => {
                 bodyXml.push(`
                   <w:tc>
-                    <w:p><w:r><w:rPr><w:sz w:val="20"/><w:color w:val="334155"/></w:rPr><w:t>${this.escapeXml(c)}</w:t></w:r></w:p>
+                    <w:p><w:r><w:rPr><w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}"/><w:sz w:val="20"/><w:color w:val="334155"/></w:rPr><w:t>${this.escapeXml(c)}</w:t></w:r></w:p>
                   </w:tc>
                 `);
               });
@@ -294,8 +431,9 @@ const DocxExporter = {
   /**
    * Pure JS ZIP file builder (Stores standard files with 0 external dependencies)
    */
-  buildDocxZip(documentXml, title) {
+  buildDocxZip(documentXml, title, settings = {}) {
     const encoder = new TextEncoder();
+    const docFont = settings.font || 'Calibri';
 
     const files = [
       {
@@ -305,6 +443,7 @@ const DocxExporter = {
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 </Types>`)
       },
       {
@@ -313,6 +452,28 @@ const DocxExporter = {
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>`)
+      },
+      {
+        name: 'word/_rels/document.xml.rels',
+        data: encoder.encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`)
+      },
+      {
+        name: 'word/styles.xml',
+        data: encoder.encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:docDefaults>
+    <w:rPrDefault>
+      <w:rPr>
+        <w:rFonts w:ascii="${docFont}" w:hAnsi="${docFont}" w:cs="${docFont}"/>
+        <w:sz w:val="22"/>
+        <w:lang w:val="en-US"/>
+      </w:rPr>
+    </w:rPrDefault>
+  </w:docDefaults>
+</w:styles>`)
       },
       {
         name: 'word/document.xml',
