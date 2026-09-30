@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNotes</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="brand">
+        <div class="logo-box">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">ChatNotes</h1>
+          <p class="brand-tagline">ChatGPT &rarr; Beautiful Notes</p>
+        </div>
+      </div>
+      <div id="tabStatusBadge" class="status-badge checking">
+        <span class="status-dot"></span>
+        <span id="tabStatusText" class="status-text">Detecting...</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="popup-main">
+      <!-- State Card -->
+      <section id="stateCard" class="card state-card">
+        <div class="state-icon-wrapper">
+          <svg id="stateIcon" class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+        </div>
+        <div class="state-info">
+          <h2 id="stateTitle" class="state-title">Checking Active Tab</h2>
+          <p id="stateDesc" class="state-desc">Verifying if you are on a ChatGPT conversation page...</p>
+        </div>
+      </section>
+
+      <!-- Action Section -->
+      <section class="action-section">
+        <button id="extractBtn" class="btn btn-primary" disabled>
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span id="extractBtnText">Extract Conversation</span>
+        </button>
+
+        <button id="previewBtn" class="btn btn-secondary" disabled>
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>Open Full Preview</span>
+        </button>
+      </section>
+
+      <!-- Supported Formats Section -->
+      <section class="features-card">
+        <div class="section-label">Supported Export Formats</div>
+        <div class="format-tags">
+          <span class="tag tag-pdf">📄 PDF</span>
+          <span class="tag tag-docx">📝 DOCX</span>
+          <span class="tag tag-md">📋 Markdown</span>
+          <span class="tag tag-html">🌐 HTML</span>
+        </div>
+      </section>
+
+      <!-- Template Styles Section -->
+      <section class="templates-preview">
+        <div class="section-label">Available Note Templates</div>
+        <div class="template-chips">
+          <span class="chip">📘 Academic</span>
+          <span class="chip">✨ Minimal</span>
+          <span class="chip">💻 Developer</span>
+          <span class="chip">🌟 Premium</span>
+          <span class="chip">📓 Notebook</span>
+          <span class="chip">🌙 Dark</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="popup-footer">
+      <div class="privacy-badge">
+        <svg class="privacy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>100% Client-Side &bull; No AI &bull; Strict Privacy</span>
+      </div>
+      <div class="version-tag">v1.0.0</div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

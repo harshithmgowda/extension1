@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "ChatNotes — Turn ChatGPT to Beautiful Notes",
+  "version": "1.0.0",
+  "description": "Turn ChatGPT conversations into beautiful notes (PDF, DOCX, Markdown, HTML). 100% client-side, private, no AI required.",
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "ChatNotes",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*"
+  ]
+}

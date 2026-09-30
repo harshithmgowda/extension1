@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build & Archives
+*.zip
+*.tar.gz
+dist/
+build/
+
+# Node / Package managers
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs & temp
+*.log
+temp/
+scratch/
+*.tmp
