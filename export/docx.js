@@ -106,7 +106,7 @@ const DocxExporter = {
                   <w:color w:val="1E40AF"/>
                   <w:sz w:val="26"/>
                 </w:rPr>
-                <w:t xml:space="preserve">📌 Question / Prompt</w:t>
+                <w:t xml:space="preserve">Prompt</w:t>
               </w:r>
             </w:p>
           `);
@@ -122,7 +122,7 @@ const DocxExporter = {
                   <w:color w:val="0F172A"/>
                   <w:sz w:val="28"/>
                 </w:rPr>
-                <w:t xml:space="preserve">🧠 Explanation</w:t>
+                <w:t xml:space="preserve">Explanation</w:t>
               </w:r>
             </w:p>
           `);

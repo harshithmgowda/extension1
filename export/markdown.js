@@ -18,9 +18,9 @@ const MarkdownExporter = {
     // Frontmatter / Title
     lines.push(`# ${doc.title || 'Conversation Notes'}`);
     lines.push('');
-    lines.push(`> 📅 **Date**: ${new Date(doc.createdAt || Date.now()).toLocaleDateString()}`);
+    lines.push(`> **Date**: ${new Date(doc.createdAt || Date.now()).toLocaleDateString()}`);
     if (doc.stats) {
-      lines.push(`> 📊 **Turns**: ${doc.stats.totalTurns || 0} | **Words**: ~${doc.stats.totalWords || 0} | **Read Time**: ~${doc.stats.estimatedReadTimeMinutes || 1} min`);
+      lines.push(`> **Summary**: ${doc.stats.totalTurns || 0} turns · ~${doc.stats.totalWords || 0} words · ${doc.stats.estimatedReadTimeMinutes || 1} min read`);
     }
     lines.push('');
     lines.push('---');
@@ -33,14 +33,14 @@ const MarkdownExporter = {
 
       if (mode === 'study') {
         if (isUser) {
-          lines.push(`## 📌 Question / Prompt`);
+          lines.push(`## Prompt`);
           lines.push('');
         } else {
-          lines.push(`## 🧠 Explanation`);
+          lines.push(`## Explanation`);
           lines.push('');
         }
       } else if (mode === 'exact') {
-        lines.push(`### ${isUser ? '👤 User' : '🤖 Assistant'}`);
+        lines.push(`### ${isUser ? 'User' : 'Assistant'}`);
         lines.push('');
       } else if (mode === 'compact') {
         lines.push(`**[${isUser ? 'Q' : 'A'}]**`);

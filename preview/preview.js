@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resetDemoBtn = document.getElementById('resetDemoBtn');
 
   // Control Elements
-  const modeButtons = document.querySelectorAll('.seg-btn');
-  const templateCards = document.querySelectorAll('.tpl-card');
+  const modeButtons = document.querySelectorAll('.seg-item, .seg-btn');
+  const templateCards = document.querySelectorAll('.theme-pill, .tpl-card');
   const fontFamilySelect = document.getElementById('fontFamilySelect');
   const fontSizeInput = document.getElementById('fontSizeInput');
   const fontSizeVal = document.getElementById('fontSizeVal');
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const borderStyleSelect = document.getElementById('borderStyleSelect');
   const headerStyleSelect = document.getElementById('headerStyleSelect');
   const footerStyleSelect = document.getElementById('footerStyleSelect');
-  const colorSwatches = document.querySelectorAll('.color-swatch');
+  const colorSwatches = document.querySelectorAll('.color-dot, .color-swatch');
   const customColorPicker = document.getElementById('customColorPicker');
 
   // Export Buttons
@@ -199,14 +199,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Deterministic formatting
     const formatted = DocumentFormatter.format(currentDoc, currentSettings.exportMode);
 
-    // Build HTML representation
+    // Build HTML representation (Apple minimalist document layout)
     let html = `
       <header class="doc-header">
         <h1 class="doc-title">${escapeHtml(formatted.title)}</h1>
         <div class="doc-meta">
-          <span>📅 ${new Date(currentDoc.createdAt).toLocaleDateString()}</span>
-          <span>⚡ ${formatted.mode.toUpperCase()} MODE</span>
-          <span>⏱️ ${currentDoc.stats ? currentDoc.stats.estimatedReadTimeMinutes : 1} min read</span>
+          <span>${new Date(currentDoc.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          <span class="meta-dot">&bull;</span>
+          <span>${formatted.mode.toUpperCase()}</span>
+          <span class="meta-dot">&bull;</span>
+          <span>${currentDoc.stats ? currentDoc.stats.estimatedReadTimeMinutes : 1} min read</span>
         </div>
       </header>
     `;
@@ -216,8 +218,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         html += `
           <section class="study-card">
             <div class="question-box">
-              <span class="q-icon">📌</span>
-              <span class="q-text">${escapeHtml(sec.question)}</span>
+              <span class="q-label">Prompt</span>
+              <div class="q-text">${escapeHtml(sec.question)}</div>
             </div>
             <div class="answer-blocks">
               ${renderBlocksHtml(sec.blocks)}
@@ -262,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         case 'key-points':
           return `
             <div class="key-points-box">
-              <div class="key-points-title">⭐ ${escapeHtml(block.title)}</div>
+              <div class="key-points-title">${escapeHtml(block.title)}</div>
               ${renderListHtml(block.list)}
             </div>
           `;
@@ -271,6 +273,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           const c = block.codeBlock || block;
           return `
             <div class="code-wrapper">
+              <div class="code-header-bar">
+                <span class="code-lang-label">${escapeHtml((c.language || 'code').toUpperCase())}</span>
+              </div>
               <pre><code class="language-${escapeHtml(c.language)}">${escapeHtml(c.code)}</code></pre>
             </div>
           `;
