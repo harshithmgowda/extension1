@@ -667,6 +667,22 @@ function binarySearch(nums, target) {
     showToast(`Downloaded ${filename}`);
   });
 
+  // Guarantee scroll is 0 before printing to eliminate blank first page gap
+  window.addEventListener('beforeprint', () => {
+    const canvasScroll = document.querySelector('.canvas-scroll');
+    if (canvasScroll) {
+      window._savedScrollTop = canvasScroll.scrollTop;
+      canvasScroll.scrollTop = 0;
+    }
+  });
+
+  window.addEventListener('afterprint', () => {
+    const canvasScroll = document.querySelector('.canvas-scroll');
+    if (canvasScroll && typeof window._savedScrollTop === 'number') {
+      canvasScroll.scrollTop = window._savedScrollTop;
+    }
+  });
+
   // Boot
   init();
 });

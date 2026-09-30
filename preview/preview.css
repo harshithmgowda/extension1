@@ -982,17 +982,35 @@ body {
     padding: 0 !important;
   }
 
-  /* Prevent awkward mid-element page breaks */
+  /* Compact header & prompt margins for print paper */
+  .chatnotes-document .doc-header {
+    padding-bottom: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .chatnotes-document .question-box {
+    margin-bottom: 14px !important;
+    padding: 10px 14px !important;
+  }
+
+  /* Prevent awkward mid-element page breaks on small atomic elements */
   .question-box,
   .key-points-box,
-  .xcode-window,
   table,
-  blockquote,
-  .study-card,
-  .user-turn,
-  .assistant-turn {
+  blockquote {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  /* Structural containers MUST allow natural page breaking so they don't jump to next page */
+  .study-card,
+  .user-turn,
+  .assistant-turn,
+  .answer-blocks,
+  .compact-row {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    margin-bottom: 16px !important;
   }
 
   h1, h2, h3 {
@@ -1005,13 +1023,17 @@ body {
     box-shadow: none !important;
     border: 1px solid #cbd5e1 !important;
     background: #f8fafc !important;
-    margin: 16px 0 !important;
+    margin: 14px 0 !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
   }
 
   .xcode-header {
     background: #e2e8f0 !important;
     border-bottom: 1px solid #cbd5e1 !important;
     padding: 6px 12px !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
 
   .xcode-dot {
