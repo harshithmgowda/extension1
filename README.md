@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Export ChatGPT conversations into publication-ready PDF, DOCX, Markdown, and HTML notes.</strong><br>
-  <em>100% Client-Side • Zero AI APIs • Zero Tracking • Free & Open Source</em>
+  <em>100% Client-Side • Zero Tracking • Free & Open Source</em>
 </p>
 
 <p align="center">
